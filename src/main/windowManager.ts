@@ -409,13 +409,6 @@ class WindowManager {
       this.mainWindow?.webContents.focus()
     }, 50)
   }
-
-  /**
-   * 延时辅助函数
-   */
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms))
-  }
 }
 
 // 导出单例
