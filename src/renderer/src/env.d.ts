@@ -159,6 +159,7 @@ declare global {
         startUpdate: (updateInfo: any) => Promise<{ success: boolean; error?: string }>
       }
       getAppVersion: () => Promise<string>
+      getSystemVersions: () => Promise<NodeJS.ProcessVersions>
     }
   }
 }

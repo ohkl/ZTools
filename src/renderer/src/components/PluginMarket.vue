@@ -13,7 +13,9 @@
           </div>
           <div class="plugin-info">
             <div class="plugin-name" @click="openPluginDetail(plugin)">{{ plugin.name }}</div>
-            <div class="plugin-description" :title="plugin.description">{{ plugin.description }}</div>
+            <div class="plugin-description" :title="plugin.description">
+              {{ plugin.description }}
+            </div>
           </div>
           <div class="plugin-action">
             <template v-if="plugin.installed">

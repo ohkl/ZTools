@@ -15,116 +15,118 @@
 
       <!-- 插件列表 -->
       <div class="plugin-list">
-      <div v-for="plugin in plugins" :key="plugin.path" class="plugin-item">
-        <img v-if="plugin.logo" :src="plugin.logo" class="plugin-icon" alt="插件图标" />
-        <div v-else class="plugin-icon-placeholder">🧩</div>
+        <div v-for="plugin in plugins" :key="plugin.path" class="plugin-item">
+          <img v-if="plugin.logo" :src="plugin.logo" class="plugin-icon" alt="插件图标" />
+          <div v-else class="plugin-icon-placeholder">🧩</div>
 
-        <div class="plugin-info">
-          <div class="plugin-name" title="查看详情" @click="openPluginDetail(plugin)">
-            {{ plugin.name }}
-            <span class="plugin-version">v{{ plugin.version }}</span>
-            <span v-if="plugin.isDevelopment" class="dev-badge">开发中</span>
+          <div class="plugin-info">
+            <div class="plugin-name" title="查看详情" @click="openPluginDetail(plugin)">
+              {{ plugin.name }}
+              <span class="plugin-version">v{{ plugin.version }}</span>
+              <span v-if="plugin.isDevelopment" class="dev-badge">开发中</span>
+            </div>
+            <div class="plugin-desc">{{ plugin.description || '暂无描述' }}</div>
+            <div v-if="isPluginRunning(plugin.path)" class="plugin-status running">
+              <span class="status-dot"></span>
+              运行中
+            </div>
           </div>
-          <div class="plugin-desc">{{ plugin.description || '暂无描述' }}</div>
-          <div v-if="isPluginRunning(plugin.path)" class="plugin-status running">
-            <span class="status-dot"></span>
-            运行中
+
+          <div class="plugin-meta">
+            <button class="icon-btn open-btn" title="打开插件" @click="handleOpenPlugin(plugin)">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+            </button>
+            <button
+              v-if="isPluginRunning(plugin.path)"
+              class="icon-btn kill-btn"
+              title="终止运行"
+              :disabled="isKilling"
+              @click="handleKillPlugin(plugin)"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              </svg>
+            </button>
+            <button
+              class="icon-btn reload-btn"
+              :disabled="isReloading"
+              title="重新加载 plugin.json 配置文件"
+              @click="handleReloadPlugin(plugin)"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path
+                  d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+                ></path>
+              </svg>
+            </button>
+            <button
+              class="icon-btn delete-btn"
+              title="删除插件"
+              :disabled="isDeleting"
+              @click="handleDeletePlugin(plugin)"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path
+                  d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                ></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
+            </button>
           </div>
         </div>
 
-        <div class="plugin-meta">
-          <button class="icon-btn open-btn" title="打开插件" @click="handleOpenPlugin(plugin)">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <polygon points="5 3 19 12 5 21 5 3"></polygon>
-            </svg>
-          </button>
-          <button
-            v-if="isPluginRunning(plugin.path)"
-            class="icon-btn kill-btn"
-            title="终止运行"
-            :disabled="isKilling"
-            @click="handleKillPlugin(plugin)"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            </svg>
-          </button>
-          <button
-            class="icon-btn reload-btn"
-            :disabled="isReloading"
-            title="重新加载 plugin.json 配置文件"
-            @click="handleReloadPlugin(plugin)"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <polyline points="23 4 23 10 17 10"></polyline>
-              <polyline points="1 20 1 14 7 14"></polyline>
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-            </svg>
-          </button>
-          <button
-            class="icon-btn delete-btn"
-            title="删除插件"
-            :disabled="isDeleting"
-            @click="handleDeletePlugin(plugin)"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path
-                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-              ></path>
-              <line x1="10" y1="11" x2="10" y2="17"></line>
-              <line x1="14" y1="11" x2="14" y2="17"></line>
-            </svg>
-          </button>
+        <!-- 空状态 -->
+        <div v-if="!isLoading && plugins.length === 0" class="empty-state">
+          <div class="empty-icon">📦</div>
+          <div class="empty-text">暂无插件</div>
+          <div class="empty-hint">点击"导入本地插件"来安装你的第一个插件</div>
         </div>
-      </div>
-
-      <!-- 空状态 -->
-      <div v-if="!isLoading && plugins.length === 0" class="empty-state">
-        <div class="empty-icon">📦</div>
-        <div class="empty-text">暂无插件</div>
-        <div class="empty-hint">点击"导入本地插件"来安装你的第一个插件</div>
-      </div>
       </div>
     </div>
 

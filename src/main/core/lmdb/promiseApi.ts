@@ -6,7 +6,7 @@ import { SyncApi } from './syncApi'
  * 将同步 API 包装为 Promise 形式
  */
 export class PromiseApi {
-  constructor(private syncApi: SyncApi) { }
+  constructor(private syncApi: SyncApi) {}
 
   /**
    * 创建或更新文档（异步）

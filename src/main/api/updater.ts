@@ -80,7 +80,9 @@ export class UpdaterAPI {
         const updateInfo = JSON.parse(content)
 
         // 确保包含必要字段
-        if (!updateInfo.version || !updateInfo.downloadUrl) {
+        const hasDownloadUrl =
+          updateInfo.downloadUrl || updateInfo.downloadUrlWin64 || updateInfo.downloadUrlMacArm
+        if (!updateInfo.version || !hasDownloadUrl) {
           throw new Error('更新信息格式错误')
         }
 
@@ -110,7 +112,21 @@ export class UpdaterAPI {
   private async startUpdate(updateInfo: any): Promise<any> {
     try {
       console.log('开始更新流程...', updateInfo)
-      const downloadUrl = updateInfo.downloadUrl
+      let downloadUrl = updateInfo.downloadUrl
+
+      const isMac = process.platform === 'darwin'
+      const isWin = process.platform === 'win32'
+      const isArm64 = process.arch === 'arm64'
+
+      if (isWin && updateInfo.downloadUrlWin64) {
+        downloadUrl = updateInfo.downloadUrlWin64
+      } else if (isMac && isArm64 && updateInfo.downloadUrlMacArm) {
+        downloadUrl = updateInfo.downloadUrlMacArm
+      }
+
+      if (!downloadUrl) {
+        throw new Error(`未找到适配当前系统(${process.platform}-${process.arch})的下载地址`)
+      }
 
       // 1. 获取真实下载链接
       const realDownloadUrl = await getLanzouDownloadLink(downloadUrl)
@@ -163,8 +179,7 @@ export class UpdaterAPI {
       console.log('找到更新文件:', { asarSrc, unpackedSrc })
 
       // 5. 准备 Updater 参数
-      const isMac = process.platform === 'darwin'
-      const isWin = process.platform === 'win32'
+      // isMac and isWin are already defined at the top of the function
 
       let updaterPath = ''
       const appPath = process.execPath

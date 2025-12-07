@@ -143,7 +143,9 @@ contextBridge.exposeInMainWorld('ztools', {
     startUpdate: (updateInfo: any) => ipcRenderer.invoke('updater:start-update', updateInfo)
   },
   // 获取应用版本
-  getAppVersion: () => ipcRenderer.invoke('get-app-version')
+  getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+  // 获取环境版本信息 (Electron, Node, Chrome等)
+  getSystemVersions: () => ipcRenderer.invoke('get-system-versions')
 })
 
 // TypeScript 类型定义

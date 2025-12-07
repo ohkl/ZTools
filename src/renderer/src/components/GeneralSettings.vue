@@ -179,7 +179,13 @@
     <div class="setting-item">
       <div class="setting-label">
         <span>软件更新</span>
-        <span class="setting-desc">当前版本: {{ appVersion }}</span>
+        <div class="version-info">
+          <div>当前版本: {{ appVersion }}</div>
+          <div class="versions-detail">
+            Electron: {{ versions.electron }} | Node: {{ versions.node }} | Chrome:
+            {{ versions.chrome }}
+          </div>
+        </div>
       </div>
       <div class="setting-control">
         <button class="select-btn" :disabled="isCheckingUpdate" @click="handleCheckUpdate">
@@ -212,6 +218,7 @@ const launchAtLogin = ref(false)
 
 // 软件版本
 const appVersion = ref('')
+const versions = ref({ electron: '', node: '', chrome: '' })
 const isCheckingUpdate = ref(false)
 
 // 主题色选项
@@ -473,6 +480,12 @@ async function handleLaunchAtLoginChange(): Promise<void> {
 async function getAppVersion(): Promise<void> {
   try {
     appVersion.value = await window.ztools.getAppVersion()
+    const vs = await window.ztools.getSystemVersions()
+    versions.value = {
+      electron: vs.electron || '未知',
+      node: vs.node || '未知',
+      chrome: vs.chrome || '未知'
+    }
   } catch (error) {
     console.error('获取版本失败:', error)
     appVersion.value = '未知'
@@ -620,6 +633,19 @@ onMounted(() => {
 .setting-desc {
   font-size: 13px;
   color: var(--text-secondary);
+}
+
+.version-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.versions-detail {
+  font-size: 12px;
+  opacity: 0.8;
 }
 
 .setting-control {

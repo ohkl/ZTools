@@ -1,252 +1,259 @@
-const fs = require('fs-extra');
-const path = require('path');
+const fs = require('fs-extra')
+const path = require('path')
 
 module.exports = async function (context) {
-  console.log('开始清理国际化文件...');
+  console.log('开始清理国际化文件...')
 
   // 定义要保留的语言包
-  const keepLocales = ['en.lproj', 'zh_CN.lproj'];
+  const keepLocales = ['en.lproj', 'zh_CN.lproj']
 
   // macOS 平台
   if (context.electronPlatformName === 'darwin') {
-    const appName = context.packager.appInfo.productFilename;
-    const appPath = path.join(context.appOutDir, `${appName}.app`);
+    const appName = context.packager.appInfo.productFilename
+    const appPath = path.join(context.appOutDir, `${appName}.app`)
 
     // 需要清理的路径列表
     const resourcesPaths = [
       // 应用主 Resources
       path.join(appPath, 'Contents', 'Resources'),
       // Electron Framework Resources
-      path.join(appPath, 'Contents', 'Frameworks', 'Electron Framework.framework', 'Versions', 'A', 'Resources')
-    ];
+      path.join(
+        appPath,
+        'Contents',
+        'Frameworks',
+        'Electron Framework.framework',
+        'Versions',
+        'A',
+        'Resources'
+      )
+    ]
 
-    let totalDeleted = 0;
-    let totalSize = 0;
+    let totalDeleted = 0
+    let totalSize = 0
 
     for (const resourcesPath of resourcesPaths) {
       try {
         if (await fs.pathExists(resourcesPath)) {
-          console.log(`\n清理目录: ${resourcesPath}`);
-          const files = await fs.readdir(resourcesPath);
-          let deletedCount = 0;
+          console.log(`\n清理目录: ${resourcesPath}`)
+          const files = await fs.readdir(resourcesPath)
+          let deletedCount = 0
 
           for (const file of files) {
             if (file.endsWith('.lproj') && !keepLocales.includes(file)) {
-              const filePath = path.join(resourcesPath, file);
+              const filePath = path.join(resourcesPath, file)
 
               // 计算大小
               try {
-                const size = await getFolderSize(filePath);
-                totalSize += size;
+                const size = await getFolderSize(filePath)
+                totalSize += size
               } catch (err) {
                 // 忽略
               }
 
-              await fs.remove(filePath);
-              console.log(`  已删除: ${file}`);
-              deletedCount++;
-              totalDeleted++;
+              await fs.remove(filePath)
+              console.log(`  已删除: ${file}`)
+              deletedCount++
+              totalDeleted++
             }
           }
 
           if (deletedCount === 0) {
-            console.log('  没有需要删除的语言包');
+            console.log('  没有需要删除的语言包')
           }
         } else {
-          console.log(`  目录不存在: ${resourcesPath}`);
+          console.log(`  目录不存在: ${resourcesPath}`)
         }
       } catch (err) {
-        console.error(`  清理目录出错 ${resourcesPath}:`, err);
+        console.error(`  清理目录出错 ${resourcesPath}:`, err)
       }
     }
 
-    console.log(`\nmacOS 总计: 删除 ${totalDeleted} 个语言包`);
-    console.log(`节省空间约: ${(totalSize / 1024 / 1024).toFixed(2)} MB`);
+    console.log(`\nmacOS 总计: 删除 ${totalDeleted} 个语言包`)
+    console.log(`节省空间约: ${(totalSize / 1024 / 1024).toFixed(2)} MB`)
   }
 
   // Windows 平台
   if (context.electronPlatformName === 'win32') {
-    const localesPath = path.join(context.appOutDir, 'locales');
-    const keepLocalesPak = ['en-US.pak', 'zh-CN.pak'];
+    const localesPath = path.join(context.appOutDir, 'locales')
+    const keepLocalesPak = ['en-US.pak', 'zh-CN.pak']
 
     try {
       if (await fs.pathExists(localesPath)) {
-        const files = await fs.readdir(localesPath);
-        let deletedCount = 0;
+        const files = await fs.readdir(localesPath)
+        let deletedCount = 0
 
         for (const file of files) {
           if (file.endsWith('.pak') && !keepLocalesPak.includes(file)) {
-            const filePath = path.join(localesPath, file);
-            await fs.remove(filePath);
-            console.log(`已删除: ${file}`);
-            deletedCount++;
+            const filePath = path.join(localesPath, file)
+            await fs.remove(filePath)
+            console.log(`已删除: ${file}`)
+            deletedCount++
           }
         }
 
-        console.log(`Windows: 共删除 ${deletedCount} 个语言包`);
+        console.log(`Windows: 共删除 ${deletedCount} 个语言包`)
       }
     } catch (err) {
-      console.error('删除 Windows 语言包时出错:', err);
+      console.error('删除 Windows 语言包时出错:', err)
     }
   }
 
   // Linux 平台
   if (context.electronPlatformName === 'linux') {
-    const localesPath = path.join(context.appOutDir, 'locales');
-    const keepLocalesPak = ['en-US.pak', 'zh-CN.pak'];
+    const localesPath = path.join(context.appOutDir, 'locales')
+    const keepLocalesPak = ['en-US.pak', 'zh-CN.pak']
 
     try {
       if (await fs.pathExists(localesPath)) {
-        const files = await fs.readdir(localesPath);
-        let deletedCount = 0;
+        const files = await fs.readdir(localesPath)
+        let deletedCount = 0
 
         for (const file of files) {
           if (file.endsWith('.pak') && !keepLocalesPak.includes(file)) {
-            const filePath = path.join(localesPath, file);
-            await fs.remove(filePath);
-            console.log(`已删除: ${file}`);
-            deletedCount++;
+            const filePath = path.join(localesPath, file)
+            await fs.remove(filePath)
+            console.log(`已删除: ${file}`)
+            deletedCount++
           }
         }
 
-        console.log(`Linux: 共删除 ${deletedCount} 个语言包`);
+        console.log(`Linux: 共删除 ${deletedCount} 个语言包`)
       }
     } catch (err) {
-      console.error('删除 Linux 语言包时出错:', err);
+      console.error('删除 Linux 语言包时出错:', err)
     }
   }
 
   // 复制升级程序
-  console.log('\n开始复制升级程序...');
-  const updaterDir = path.resolve(__dirname, '../updater');
+  console.log('\n开始复制升级程序...')
+  const updaterDir = path.resolve(__dirname, '../updater')
 
   try {
     if (context.electronPlatformName === 'darwin') {
-      const arch = context.arch === 1 ? 'arm64' : 'amd64'; // 1 is arm64 in electron-builder context usually, but let's double check or use safe path
-      // electron-builder context.arch is a number (0=ia32, 1=x64, 3=arm64) usually from electron-builder internals, 
+      const arch = context.arch === 1 ? 'arm64' : 'amd64' // 1 is arm64 in electron-builder context usually, but let's double check or use safe path
+      // electron-builder context.arch is a number (0=ia32, 1=x64, 3=arm64) usually from electron-builder internals,
       // but easier to rely on string if available or check standard mapping.
       // Actually standard electron-builder `context.arch` is distinct.
       // Let's rely on standard folder names matching current build.
       // Simply check which folder exists or use context.archName which is string 'x64' or 'arm64'
 
-      const archName = context.arch === 3 ? 'arm64' : 'amd64'; // 3 is arm64, 1 is x64. 
+      const archName = context.arch === 3 ? 'arm64' : 'amd64' // 3 is arm64, 1 is x64.
       // Safe fallback:
-      const safeArch = context.arch === 3 || context.arch === 'arm64' ? 'arm64' : 'amd64';
+      const safeArch = context.arch === 3 || context.arch === 'arm64' ? 'arm64' : 'amd64'
 
-      const appName = context.packager.appInfo.productFilename;
-      const appPath = path.join(context.appOutDir, `${appName}.app`);
-      const dest = path.join(appPath, 'Contents', 'MacOS', 'ztools-updater');
-      const src = path.join(updaterDir, `mac-${safeArch}`, 'ztools-updater');
+      const appName = context.packager.appInfo.productFilename
+      const appPath = path.join(context.appOutDir, `${appName}.app`)
+      const dest = path.join(appPath, 'Contents', 'MacOS', 'ztools-updater')
+      const src = path.join(updaterDir, `mac-${safeArch}`, 'ztools-updater')
 
       if (await fs.pathExists(src)) {
-        await fs.copy(src, dest);
-        await fs.chmod(dest, 0o755);
-        console.log(`已复制 updater 到: ${dest}`);
+        await fs.copy(src, dest)
+        await fs.chmod(dest, 0o755)
+        console.log(`已复制 updater 到: ${dest}`)
       } else {
-        console.error(`未找到 updater 文件: ${src}`);
+        console.error(`未找到 updater 文件: ${src}`)
       }
     } else if (context.electronPlatformName === 'win32') {
-      const safeArch = context.arch === 1 || context.arch === 'x64' ? 'amd64' : '386'; // Adjust as needed
+      const safeArch = context.arch === 1 || context.arch === 'x64' ? 'amd64' : '386' // Adjust as needed
       // Actually my previous ls command showed `win-amd64`.
       // Let's assume 64bit build for now or check.
       // Usually user builds for x64.
-      const src = path.join(updaterDir, 'win-amd64', 'ztools-updater.exe');
-      const dest = path.join(context.appOutDir, 'ztools-updater.exe');
+      const src = path.join(updaterDir, 'win-amd64', 'ztools-updater.exe')
+      const dest = path.join(context.appOutDir, 'ztools-updater.exe')
 
       if (await fs.pathExists(src)) {
-        await fs.copy(src, dest);
-        console.log(`已复制 updater 到: ${dest}`);
+        await fs.copy(src, dest)
+        console.log(`已复制 updater 到: ${dest}`)
       } else {
-        console.error(`未找到 updater 文件: ${src}`);
+        console.error(`未找到 updater 文件: ${src}`)
       }
     }
   } catch (err) {
-    console.error('复制升级程序失败:', err);
+    console.error('复制升级程序失败:', err)
   }
 
-  console.log('\n国际化文件清理完成!');
+  console.log('\n国际化文件清理完成!')
 
   // 打包更新文件
   try {
-    console.log('\n开始打包更新文件...');
-    const AdmZip = require('adm-zip');
+    console.log('\n开始打包更新文件...')
+    const AdmZip = require('adm-zip')
 
     // 确定 app.asar 路径
-    let asarPath = '';
-    let unpackedPath = '';
+    let asarPath = ''
+    let unpackedPath = ''
 
     if (context.electronPlatformName === 'darwin') {
-      const appName = context.packager.appInfo.productFilename;
-      const appPath = path.join(context.appOutDir, `${appName}.app`);
-      asarPath = path.join(appPath, 'Contents', 'Resources', 'app.asar');
-      unpackedPath = path.join(appPath, 'Contents', 'Resources', 'app.asar.unpacked');
+      const appName = context.packager.appInfo.productFilename
+      const appPath = path.join(context.appOutDir, `${appName}.app`)
+      asarPath = path.join(appPath, 'Contents', 'Resources', 'app.asar')
+      unpackedPath = path.join(appPath, 'Contents', 'Resources', 'app.asar.unpacked')
     } else {
-      asarPath = path.join(context.appOutDir, 'resources', 'app.asar');
-      unpackedPath = path.join(context.appOutDir, 'resources', 'app.asar.unpacked');
+      asarPath = path.join(context.appOutDir, 'resources', 'app.asar')
+      unpackedPath = path.join(context.appOutDir, 'resources', 'app.asar.unpacked')
     }
 
     if (await fs.pathExists(asarPath)) {
       // 输出路径
       // context.outDir 是 dist 目录 (electron-builder 默认)
       // 使用 version 命名
-      const version = context.packager.appInfo.version;
+      const version = context.packager.appInfo.version
       // 使用 platform-arch 区分
-      const archName = context.arch === 3 || context.arch === 'arm64' ? 'arm64' : 'x64';
-      const platform = context.electronPlatformName;
+      const archName = context.arch === 3 || context.arch === 'arm64' ? 'arm64' : 'x64'
+      const platform = context.electronPlatformName
 
       // 确保输出目录存在 (context.outDir 似乎不可靠，appOutDir 的上级通常是 arch 目录，再上级是 dist)
       // 通常 context.packager.projectDir 是项目根目录
       // 我们放到项目根目录的 dist_updates 下吧，或者直接放到 outDir 下
-      const outDir = path.dirname(context.appOutDir);
-      const zipName = `update-${platform}-${archName}-${version}.zip`;
-      const zipPath = path.join(outDir, zipName);
+      const outDir = path.dirname(context.appOutDir)
+      const zipName = `update-${platform}-${archName}-${version}.zip`
+      const zipPath = path.join(outDir, zipName)
 
-      console.log('正在创建 zip...');
-      const zip = new AdmZip();
+      console.log('正在创建 zip...')
+      const zip = new AdmZip()
 
       // 添加 app.asar 并重命名为 app.asar.tmp
-      zip.addLocalFile(asarPath, '', 'app.asar.tmp');
-      console.log(`已添加 app.asar (重命名为 app.asar.tmp)`);
+      zip.addLocalFile(asarPath, '', 'app.asar.tmp')
+      console.log(`已添加 app.asar (重命名为 app.asar.tmp)`)
 
       if (await fs.pathExists(unpackedPath)) {
-        zip.addLocalFolder(unpackedPath, 'app.asar.unpacked');
-        console.log(`已添加 app.asar.unpacked`);
+        zip.addLocalFolder(unpackedPath, 'app.asar.unpacked')
+        console.log(`已添加 app.asar.unpacked`)
       }
 
-      zip.writeZip(zipPath);
+      zip.writeZip(zipPath)
 
-      const stats = await fs.stat(zipPath);
-      console.log(`更新包已生成: ${zipPath}`);
-      console.log(`Total size: ${(stats.size / 1024 / 1024).toFixed(2)} MB`);
-
+      const stats = await fs.stat(zipPath)
+      console.log(`更新包已生成: ${zipPath}`)
+      console.log(`Total size: ${(stats.size / 1024 / 1024).toFixed(2)} MB`)
     } else {
-      console.error(`未找到 app.asar: ${asarPath}`);
+      console.error(`未找到 app.asar: ${asarPath}`)
     }
   } catch (err) {
-    console.error('打包更新文件失败:', err);
+    console.error('打包更新文件失败:', err)
   }
-};
+}
 
 // 计算文件夹大小
 async function getFolderSize(folderPath) {
-  let totalSize = 0;
+  let totalSize = 0
 
   try {
-    const files = await fs.readdir(folderPath);
+    const files = await fs.readdir(folderPath)
 
     for (const file of files) {
-      const filePath = path.join(folderPath, file);
-      const stats = await fs.stat(filePath);
+      const filePath = path.join(folderPath, file)
+      const stats = await fs.stat(filePath)
 
       if (stats.isDirectory()) {
-        totalSize += await getFolderSize(filePath);
+        totalSize += await getFolderSize(filePath)
       } else {
-        totalSize += stats.size;
+        totalSize += stats.size
       }
     }
   } catch (err) {
     // 忽略错误
   }
 
-  return totalSize;
+  return totalSize
 }

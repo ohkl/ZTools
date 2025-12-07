@@ -114,7 +114,8 @@ window.ztools = {
     getStatus: async () => await electron.ipcRenderer.invoke('clipboard:get-status'),
     write: async (id) => await electron.ipcRenderer.invoke('clipboard:write', id),
     // 写入内容到剪贴板 ({ type: 'text'|'image', content: string })
-    writeContent: async (data) => await electron.ipcRenderer.invoke('clipboard:write-content', data),
+    writeContent: async (data) =>
+      await electron.ipcRenderer.invoke('clipboard:write-content', data),
     updateConfig: async (config) =>
       await electron.ipcRenderer.invoke('clipboard:update-config', config),
     // 监听剪贴板变化事件
@@ -255,8 +256,8 @@ window.ztools = {
   getWebContentsId: () => electron.ipcRenderer.sendSync('get-web-contents-id'),
   // 使用系统默认程序打开 URL
   shellOpenExternal: (url) => electron.ipcRenderer.sendSync('shell-open-external', url),
-  // 获取应用版本
-  getAppVersion: () => electron.ipcRenderer.invoke('get-app-version')
+
+
 }
 
 electron.ipcRenderer.on('on-plugin-enter', (event, launchParam) => {

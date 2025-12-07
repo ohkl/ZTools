@@ -41,6 +41,7 @@ export class SystemAPI {
 
     // App Info
     ipcMain.handle('get-app-version', () => app.getVersion())
+    ipcMain.handle('get-system-versions', () => process.versions)
   }
 
   private async openExternal(url: string): Promise<void> {
