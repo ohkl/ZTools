@@ -6,7 +6,7 @@
 
 ### 报告 Bug
 
-如果你发现了 Bug，请在 [Issues](https://github.com/lzx8589561/ZTools/issues) 中创建一个新的 Issue，并提供以下信息：
+如果你发现了 Bug，请在 [Issues](https://github.com/ZToolsCenter/ZTools/issues) 中创建一个新的 Issue，并提供以下信息：
 
 - 操作系统版本（macOS/Windows 版本号）
 - ZTools 版本号
@@ -39,7 +39,7 @@ git clone https://github.com/your-username/ZTools.git
 cd ZTools
 
 # 添加上游仓库
-git remote add upstream https://github.com/lzx8589561/ZTools.git
+git remote add upstream https://github.com/ZToolsCenter/ZTools.git
 ```
 
 ### 2. 创建分支

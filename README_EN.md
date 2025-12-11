@@ -6,9 +6,9 @@
 
 *Open Source Implementation of uTools | Supports macOS and Windows*
 
-[![GitHub release](https://img.shields.io/github/v/release/lzx8589561/ZTools)](https://github.com/lzx8589561/ZTools/releases)
+[![GitHub release](https://img.shields.io/github/v/release/lzx8589561/ZTools)](https://github.com/ZToolsCenter/ZTools/releases)
 [![License](https://img.shields.io/github/license/lzx8589561/ZTools)](./LICENSE)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-blue)](https://github.com/lzx8589561/ZTools)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-blue)](https://github.com/ZToolsCenter/ZTools)
 
 English | [简体中文](./README.md)
 
@@ -41,7 +41,7 @@ English | [简体中文](./README.md)
 
 #### Method 1: Download Pre-built Version (Recommended)
 
-Download the latest version from [Releases](https://github.com/lzx8589561/ZTools/releases):
+Download the latest version from [Releases](https://github.com/ZToolsCenter/ZTools/releases):
 
 - **macOS**: `ztools-x.x.x.dmg` or `zTools-x.x.x-arm64-mac.zip`
 - **Windows**: `ztools-x.x.x-setup.exe` or `ztools-x.x.x-win.zip`
@@ -50,7 +50,7 @@ Download the latest version from [Releases](https://github.com/lzx8589561/ZTools
 
 ```bash
 # Clone the repository
-git clone https://github.com/lzx8589561/ZTools.git
+git clone https://github.com/ZToolsCenter/ZTools.git
 cd ZTools
 
 # Install dependencies
@@ -293,7 +293,7 @@ npm run build:unpack       # Package without installer (for debugging)
 
 ## 🐛 Issue Reporting
 
-Having issues? Please report them in [Issues](https://github.com/lzx8589561/ZTools/issues).
+Having issues? Please report them in [Issues](https://github.com/ZToolsCenter/ZTools/issues).
 
 When submitting an issue, please include:
 

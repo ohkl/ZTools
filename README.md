@@ -6,9 +6,9 @@
 
 *uTools 的开源实现 | 支持 macOS 和 Windows*
 
-[![GitHub release](https://img.shields.io/github/v/release/lzx8589561/ZTools)](https://github.com/lzx8589561/ZTools/releases)
+[![GitHub release](https://img.shields.io/github/v/release/lzx8589561/ZTools)](https://github.com/ZToolsCenter/ZTools/releases)
 [![License](https://img.shields.io/github/license/lzx8589561/ZTools)](./LICENSE)
-[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-blue)](https://github.com/lzx8589561/ZTools)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-blue)](https://github.com/ZToolsCenter/ZTools)
 
 [English](./README_EN.md) | 简体中文
 
@@ -41,7 +41,7 @@
 
 #### 方式 1：下载预编译版本（推荐）
 
-从 [Releases](https://github.com/lzx8589561/ZTools/releases) 页面下载最新版本：
+从 [Releases](https://github.com/ZToolsCenter/ZTools/releases) 页面下载最新版本：
 
 - **macOS**: `ztools-x.x.x.dmg` 或 `zTools-x.x.x-arm64-mac.zip`
 - **Windows**: `ztools-x.x.x-setup.exe` 或 `ztools-x.x.x-win.zip`
@@ -50,7 +50,7 @@
 
 ```bash
 # 克隆仓库
-git clone https://github.com/lzx8589561/ZTools.git
+git clone https://github.com/ZToolsCenter/ZTools.git
 cd ZTools
 
 # 安装依赖
@@ -293,7 +293,7 @@ npm run build:unpack       # 打包但不生成安装包（调试用）
 
 ## 🐛 问题反馈
 
-遇到问题？请在 [Issues](https://github.com/lzx8589561/ZTools/issues) 中反馈。
+遇到问题？请在 [Issues](https://github.com/ZToolsCenter/ZTools/issues) 中反馈。
 
 提交 Issue 时请包含：
 

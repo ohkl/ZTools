@@ -4,13 +4,13 @@
   "description": "一个高性能、可扩展的应用启动器和插件平台",
   "main": "./out/main/index.js",
   "author": "lzx8589561",
-  "homepage": "https://github.com/lzx8589561/ZTools",
+  "homepage": "https://github.com/ZToolsCenter/ZTools",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lzx8589561/ZTools.git"
+    "url": "https://github.com/ZToolsCenter/ZTools.git"
   },
   "bugs": {
-    "url": "https://github.com/lzx8589561/ZTools/issues"
+    "url": "https://github.com/ZToolsCenter/ZTools/issues"
   },
   "license": "MIT",
   "scripts": {
