@@ -115,6 +115,7 @@
           { 'default-avatar': isDefaultAvatar },
           { 'plugin-logo': windowStore.currentPlugin?.logo }
         ]"
+        draggable="false"
         @click="handleSettingsClick"
       />
     </div>

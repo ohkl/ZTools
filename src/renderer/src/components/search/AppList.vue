@@ -25,10 +25,18 @@
             {{ app.icon }}
           </div>
           <!-- 图片图标 (base64) -->
+          <!-- 特殊图标使用渐变背景 -->
+          <div
+            v-if="app.icon && !hasIconError(app) && app.needsIconFilter"
+            class="app-icon adaptive-icon"
+            :style="{ '--icon-url': `url(${app.icon})` }"
+          ></div>
+          <!-- 普通图标 -->
           <img
             v-else-if="app.icon && !hasIconError(app)"
             :src="app.icon"
-            :class="['app-icon', { 'system-setting-icon': app.subType === 'system-setting' }]"
+            class="app-icon"
+            draggable="false"
             @error="(e) => onIconError(e, app)"
           />
           <!-- 占位图标（无图标或加载失败时显示） -->
@@ -57,10 +65,18 @@
           {{ app.icon }}
         </div>
         <!-- 图片图标 (base64) -->
+        <!-- 特殊图标使用渐变背景 -->
+        <div
+          v-if="app.icon && !hasIconError(app) && app.needsIconFilter"
+          class="app-icon adaptive-icon"
+          :style="{ '--icon-url': `url(${app.icon})` }"
+        ></div>
+        <!-- 普通图标 -->
         <img
           v-else-if="app.icon && !hasIconError(app)"
           :src="app.icon"
-          :class="['app-icon', { 'system-setting-icon': app.subType === 'system-setting' }]"
+          class="app-icon"
+          draggable="false"
           @error="(e) => onIconError(e, app)"
         />
         <!-- 占位图标（无图标或加载失败时显示） -->
@@ -78,10 +94,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch, type ComponentPublicInstance } from 'vue'
-import Draggable from 'vuedraggable'
-import type { Command } from '../../stores/commandDataStore'
-import { highlightMatch } from '../../utils/highlight'
+import { computed, nextTick, ref, watch, type ComponentPublicInstance } from 'vue';
+import Draggable from 'vuedraggable';
+import type { Command } from '../../stores/commandDataStore';
+import { highlightMatch } from '../../utils/highlight';
 
 const props = withDefaults(
   defineProps<{
@@ -255,10 +271,7 @@ defineExpose({
   flex-shrink: 0;
 }
 
-/* 系统设置图标在亮色模式下反转颜色 */
-.app-icon.system-setting-icon {
-  filter: var(--system-icon-filter);
-}
+/* 自适应图标样式由全局 CSS 处理（style.css） */
 
 .app-icon-emoji {
   width: 40px;
@@ -288,6 +301,7 @@ defineExpose({
 
 .app-name {
   font-size: 12px;
+  font-weight: 500; /* 增加字体粗细，提高可读性 */
   color: var(--text-color);
   text-align: center;
   width: 100%; /* 占满父容器宽度 */

@@ -45,27 +45,14 @@
 
     <!-- 有搜索时显示搜索结果 -->
     <div v-else class="search-results">
-      <!-- 应用和插件 -->
+      <!-- 最佳匹配（包含应用、插件、系统设置） -->
       <CollapsibleList
-        v-if="appAndPluginResults.length > 0"
+        v-if="searchResults.length > 0"
         v-model:expanded="isSearchResultsExpanded"
         title="最佳匹配"
-        :apps="appAndPluginResults"
+        :apps="searchResults"
         :selected-index="searchResultSelectedIndex"
         :empty-text="'未找到应用'"
-        :default-visible-rows="2"
-        :draggable="false"
-        @select="handleSelectApp"
-        @contextmenu="(app) => handleAppContextMenu(app, true)"
-      />
-
-      <!-- 系统设置 -->
-      <CollapsibleList
-        v-if="systemSettingResults.length > 0"
-        v-model:expanded="isSystemSettingsExpanded"
-        title="系统设置"
-        :apps="systemSettingResults"
-        :selected-index="systemSettingSelectedIndex"
         :default-visible-rows="2"
         :draggable="false"
         @select="handleSelectApp"
@@ -154,7 +141,6 @@ const selectedCol = ref(0)
 const isRecentExpanded = ref(false)
 const isPinnedExpanded = ref(false)
 const isSearchResultsExpanded = ref(false)
-const isSystemSettingsExpanded = ref(false)
 const isRecommendationsExpanded = ref(false)
 const scrollContainerRef = ref<HTMLElement>()
 
@@ -191,26 +177,12 @@ const internalSearchResults = computed(() => {
   return result.bestMatches
 })
 
-// 分离系统设置结果
-const systemSettingResults = computed(() => {
-  // 粘贴图片、文本或文件时不显示系统设置
-  if (props.pastedImage || props.pastedText || props.pastedFiles) return []
-  if (!props.searchQuery.trim()) return []
-  return internalSearchResults.value.filter(
-    (item: any) => item.type === 'direct' && item.subType === 'system-setting'
-  )
-})
-
-// 应用和插件结果（排除系统设置）
-const appAndPluginResults = computed(() => {
-  // 粘贴图片、文本或文件时显示所有支持对应类型的指令
-  if (props.pastedImage || props.pastedText || props.pastedFiles) {
-    return internalSearchResults.value
+// 搜索结果（包含应用、插件、系统设置）
+const searchResults = computed(() => {
+  if (!props.searchQuery.trim() && !props.pastedImage && !props.pastedText && !props.pastedFiles) {
+    return []
   }
-  if (!props.searchQuery.trim()) return []
-  return internalSearchResults.value.filter(
-    (item: any) => !(item.type === 'direct' && item.subType === 'system-setting')
-  )
+  return internalSearchResults.value
 })
 
 // 推荐列表
@@ -224,16 +196,13 @@ const recommendations = computed(() => {
   const searchResult = search(props.searchQuery)
   const regexResults = searchResult.regexMatches
 
+  // 百度搜索指令 - 只传入 path，其他信息由 specialCommands 提供
+  const baiduSearch = commandDataStore.applySpecialConfig({
+    path: `baidu-search:${props.searchQuery}`
+  } as any)
+
   // 正则匹配结果 + 百度搜索（内置，放最后）
-  return [
-    ...regexResults,
-    {
-      name: '百度搜索',
-      path: `baidu-search:${props.searchQuery}`,
-      icon: '🔍',
-      type: 'builtin' as const
-    }
-  ]
+  return [...regexResults, baiduSearch]
 })
 
 // 访达功能列表
@@ -302,29 +271,15 @@ function arrayToGrid(arr: any[], cols = 9): any[][] {
   return grid
 }
 
-// 可见的应用和插件结果（用于键盘导航）
-// 注意：CollapsibleList 内部会根据展开状态自动处理显示数量，这里我们需要同步
-const visibleAppAndPluginResults = computed(() => {
+// 可见的搜索结果（用于键盘导航）
+const visibleSearchResults = computed(() => {
   const defaultVisibleCount = 9 * 2 // itemsPerRow * defaultVisibleRows
-  const canExpand = appAndPluginResults.value.length > defaultVisibleCount
+  const canExpand = searchResults.value.length > defaultVisibleCount
 
-  let result
   if (!canExpand || isSearchResultsExpanded.value) {
-    result = appAndPluginResults.value
-  } else {
-    result = appAndPluginResults.value.slice(0, defaultVisibleCount)
+    return searchResults.value
   }
-
-  return result
-})
-
-// 可见的系统设置结果（用于键盘导航）
-const visibleSystemSettingResults = computed(() => {
-  const defaultVisibleCount = 9 * 2
-  if (isSystemSettingsExpanded.value || systemSettingResults.value.length <= defaultVisibleCount) {
-    return systemSettingResults.value
-  }
-  return systemSettingResults.value.slice(0, defaultVisibleCount)
+  return searchResults.value.slice(0, defaultVisibleCount)
 })
 
 // 可见的推荐列表（用于键盘导航）
@@ -341,18 +296,11 @@ const navigationGrid = computed(() => {
   const sections: any[] = []
 
   if (props.searchQuery.trim() || props.pastedImage || props.pastedText || props.pastedFiles) {
-    // 有搜索或粘贴图片/文本/文件时：应用和插件 + 系统设置 + 推荐
-    if (visibleAppAndPluginResults.value.length > 0) {
-      const searchGrid = arrayToGrid(visibleAppAndPluginResults.value)
+    // 有搜索或粘贴图片/文本/文件时：搜索结果 + 推荐
+    if (visibleSearchResults.value.length > 0) {
+      const searchGrid = arrayToGrid(visibleSearchResults.value)
       searchGrid.forEach((row) => {
         sections.push({ type: 'search', items: row })
-      })
-    }
-
-    if (visibleSystemSettingResults.value.length > 0) {
-      const settingGrid = arrayToGrid(visibleSystemSettingResults.value)
-      settingGrid.forEach((row) => {
-        sections.push({ type: 'system-setting', items: row })
       })
     }
 
@@ -417,12 +365,6 @@ const searchResultSelectedIndex = computed(() => {
   return getAbsoluteIndexForSection('search')
 })
 
-// 计算系统设置的选中索引
-const systemSettingSelectedIndex = computed(() => {
-  if (!props.searchQuery.trim()) return -1
-  return getAbsoluteIndexForSection('system-setting')
-})
-
 // 计算推荐列表中的选中索引
 const recommendationSelectedIndex = computed(() => {
   if (!props.searchQuery.trim()) return -1
@@ -461,13 +403,7 @@ watch(
 
 // 监听展开状态变化，调整窗口高度
 watch(
-  [
-    isRecentExpanded,
-    isPinnedExpanded,
-    isSearchResultsExpanded,
-    isSystemSettingsExpanded,
-    isRecommendationsExpanded
-  ],
+  [isRecentExpanded, isPinnedExpanded, isSearchResultsExpanded, isRecommendationsExpanded],
   () => {
     nextTick(() => {
       emit('height-changed')
