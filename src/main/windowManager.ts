@@ -73,7 +73,7 @@ class WindowManager {
     // 根据平台设置不同的窗口配置
     const windowConfig: Electron.BrowserWindowConstructorOptions = {
       // type: 'panel',
-      title: 'zTools',
+      title: 'ZTools',
       width: 800,
       minWidth: 800,
       height: 59,
@@ -212,7 +212,7 @@ class WindowManager {
     this.tray = new Tray(icon)
 
     // 设置托盘提示文字
-    this.tray.setToolTip('zTools')
+    this.tray.setToolTip('ZTools')
 
     // 创建右键菜单
     this.createTrayMenu()

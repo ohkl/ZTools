@@ -168,7 +168,7 @@ export class PluginRedirectAPI {
   private showNotification(body: string): void {
     if (Notification.isSupported()) {
       new Notification({
-        title: 'zTools',
+        title: 'ZTools',
         body: body
       }).show()
     }

@@ -703,12 +703,12 @@ updater 重启应用
 - **macOS**：
   - app.asar 位置：`Contents/Resources/app.asar`
   - updater 位置：`Contents/MacOS/ztools-updater`
-  - 应用路径：`Contents/MacOS/zTools`
+  - 应用路径：`Contents/MacOS/ZTools`
 
 - **Windows**：
   - app.asar 位置：`resources/app.asar`
   - updater 位置：应用根目录 `ztools-updater.exe`
-  - 应用路径：`zTools.exe`
+  - 应用路径：`ZTools.exe`
 
 **更新信息文件格式**（`ztools_update_x.x.x.txt`）：
 

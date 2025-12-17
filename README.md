@@ -43,7 +43,7 @@ _uTools 的开源实现 | 支持 macOS 和 Windows_
 
 从 [Releases](https://github.com/ZToolsCenter/ZTools/releases) 页面下载最新版本：
 
-- **macOS**: `ztools-x.x.x.dmg` 或 `zTools-x.x.x-arm64-mac.zip`
+- **macOS**: `ztools-x.x.x.dmg` 或 `ZTools-x.x.x-arm64-mac.zip`
 - **Windows**: `ztools-x.x.x-setup.exe` 或 `ztools-x.x.x-win.zip`
 
 #### 方式 2：从源码构建

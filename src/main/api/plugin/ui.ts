@@ -57,7 +57,7 @@ export class PluginUIAPI {
   private showNotification(event: Electron.IpcMainInvokeEvent, body: string): void {
     if (Notification.isSupported()) {
       const options: Electron.NotificationConstructorOptions = {
-        title: 'zTools',
+        title: 'ZTools',
         body: body
       }
 

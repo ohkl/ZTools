@@ -18,7 +18,7 @@ const mainPushCallbacks = []
 const osType = electron.ipcRenderer.sendSync('get-os-type')
 
 window.ztools = {
-  getAppName: () => 'zTools',
+  getAppName: () => 'ZTools',
   // 平台检测
   isMacOs: () => osType === 'Darwin',
   isMacOS: () => osType === 'Darwin',

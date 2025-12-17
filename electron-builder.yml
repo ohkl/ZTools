@@ -1,5 +1,5 @@
 appId: link.eiot.ztools
-productName: zTools
+productName: ZTools
 directories:
   buildResources: build
 files:
@@ -16,7 +16,8 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: ztools
+  executableName: ZTools
+  artifactName: ${name}-${version}-${arch}.${ext}
   target:
     - target: nsis
       arch:
@@ -25,7 +26,7 @@ win:
       arch:
         - x64
 nsis:
-  artifactName: ${name}-${version}-setup.${ext}
+  artifactName: ${name}-${version}-${arch}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
@@ -38,8 +39,12 @@ mac:
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
   identity: null # 不签名
+  target:
+    - dmg
+    - zip
+  artifactName: ${name}-${version}-${arch}.${ext}
 dmg:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: ${name}-${version}-${arch}.${ext}
 linux:
   target:
     - AppImage
@@ -48,7 +53,7 @@ linux:
   maintainer: electronjs.org
   category: Utility
 appImage:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: ${name}-${version}-${arch}.${ext}
 npmRebuild: false
 
 afterPack: ./build/afterPack.js

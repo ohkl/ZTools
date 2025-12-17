@@ -43,7 +43,7 @@ English | [简体中文](./README.md)
 
 Download the latest version from [Releases](https://github.com/ZToolsCenter/ZTools/releases):
 
-- **macOS**: `ztools-x.x.x.dmg` or `zTools-x.x.x-arm64-mac.zip`
+- **macOS**: `ztools-x.x.x.dmg` or `ZTools-x.x.x-arm64-mac.zip`
 - **Windows**: `ztools-x.x.x-setup.exe` or `ztools-x.x.x-win.zip`
 
 #### Method 2: Build from Source
