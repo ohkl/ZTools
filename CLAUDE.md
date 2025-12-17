@@ -320,7 +320,6 @@ search(query: string): {
 - `avatar: string` - 头像
 - `subInputPlaceholder: string` - 子输入框占位符（插件模式）
 - `autoPaste: AutoPasteOption` - 自动粘贴配置（off/1s/3s/5s/10s）
-- `hideOnBlur: boolean` - 失去焦点时隐藏窗口
 - `theme: string` - 主题模式（system/light/dark）
 - `primaryColor: string` - 主题色（blue/purple/green/orange/red/pink）
 

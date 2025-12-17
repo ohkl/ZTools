@@ -51,8 +51,6 @@ export const useWindowStore = defineStore('window', () => {
   // 自动清空配置
   const autoClear = ref<AutoClearOption>('immediately')
 
-  // 失去焦点隐藏配置
-  const hideOnBlur = ref(true)
   const theme = ref('system') // system, light, dark
   const primaryColor = ref('blue') // blue, purple, green, orange, red, pink, custom
   const customColor = ref('#db2777') // 自定义颜色
@@ -119,11 +117,6 @@ export const useWindowStore = defineStore('window', () => {
   // 更新自动清空配置
   function updateAutoClear(value: AutoClearOption): void {
     autoClear.value = value
-  }
-
-  // 更新失去焦点隐藏配置
-  function updateHideOnBlur(value: boolean): void {
-    hideOnBlur.value = value
   }
 
   function updateTheme(value: string): void {
@@ -391,9 +384,6 @@ export const useWindowStore = defineStore('window', () => {
         if (data.autoClear) {
           autoClear.value = data.autoClear
         }
-        if (data.hideOnBlur !== undefined) {
-          hideOnBlur.value = data.hideOnBlur
-        }
         if (data.theme) {
           theme.value = data.theme
         }
@@ -430,7 +420,6 @@ export const useWindowStore = defineStore('window', () => {
     subInputPlaceholder,
     autoPaste,
     autoClear,
-    hideOnBlur,
     theme,
     primaryColor,
     customColor,
@@ -443,7 +432,6 @@ export const useWindowStore = defineStore('window', () => {
     updateSubInputPlaceholder,
     updateAutoPaste,
     updateAutoClear,
-    updateHideOnBlur,
     updateTheme,
     updatePrimaryColor,
     updateCustomColor,

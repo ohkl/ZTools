@@ -226,24 +226,6 @@
       </div>
     </div>
 
-    <!-- 失去焦点隐藏设置 -->
-    <div class="setting-item">
-      <div class="setting-label">
-        <span>失去焦点隐藏窗口</span>
-        <span class="setting-desc">当窗口失去焦点时自动隐藏</span>
-      </div>
-      <div class="setting-control">
-        <label class="toggle">
-          <input
-            v-model="windowStore.hideOnBlur"
-            type="checkbox"
-            @change="handleHideOnBlurChange"
-          />
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-    </div>
-
     <!-- 显示托盘图标设置 -->
     <div class="setting-item">
       <div class="setting-label">
@@ -577,18 +559,6 @@ async function handleThemeChange(): Promise<void> {
   }
 }
 
-// 处理失去焦点隐藏配置变化
-async function handleHideOnBlurChange(): Promise<void> {
-  try {
-    await saveSettings()
-    // 通知主进程更新配置
-    await window.ztools.setHideOnBlur(windowStore.hideOnBlur)
-    console.log('失去焦点隐藏配置已更新:', windowStore.hideOnBlur)
-  } catch (error) {
-    console.error('更新失去焦点隐藏配置失败:', error)
-  }
-}
-
 // 处理主题色变化
 async function handlePrimaryColorChange(color: string): Promise<void> {
   try {
@@ -761,7 +731,6 @@ async function saveSettings(): Promise<void> {
       avatar: avatarToSave,
       autoPaste: windowStore.autoPaste,
       autoClear: windowStore.autoClear,
-      hideOnBlur: windowStore.hideOnBlur,
       theme: windowStore.theme,
       primaryColor: windowStore.primaryColor,
       customColor: customColor.value,

@@ -24,7 +24,6 @@ export class WindowAPI {
     ipcMain.handle('set-tray-icon-visible', (_event, visible: boolean) =>
       this.setTrayIconVisible(visible)
     )
-    ipcMain.handle('set-hide-on-blur', (_event, hide: boolean) => this.setHideOnBlur(hide))
   }
 
   private setupWindowEvents(): void {
@@ -82,11 +81,6 @@ export class WindowAPI {
   private setTrayIconVisible(visible: boolean): void {
     windowManager.setTrayIconVisible(visible)
     console.log('设置托盘图标可见性:', visible)
-  }
-
-  private setHideOnBlur(hide: boolean): void {
-    windowManager.setHideOnBlur(hide)
-    console.log('设置失去焦点时是否隐藏窗口:', hide)
   }
 }
 

@@ -37,7 +37,6 @@ declare global {
       setWindowPosition: (x: number, y: number) => void
       setWindowOpacity: (opacity: number) => void
       setTrayIconVisible: (visible: boolean) => Promise<void>
-      setHideOnBlur: (hide: boolean) => Promise<void>
       setLaunchAtLogin: (enable: boolean) => Promise<void>
       getLaunchAtLogin: () => Promise<boolean>
       setTheme: (theme: string) => Promise<void>

@@ -23,7 +23,6 @@ const api = {
   setWindowPosition: (x: number, y: number) => ipcRenderer.send('set-window-position', x, y),
   setWindowOpacity: (opacity: number) => ipcRenderer.send('set-window-opacity', opacity),
   setTrayIconVisible: (visible: boolean) => ipcRenderer.invoke('set-tray-icon-visible', visible),
-  setHideOnBlur: (hide: boolean) => ipcRenderer.invoke('set-hide-on-blur', hide),
   setLaunchAtLogin: (enable: boolean) => ipcRenderer.invoke('set-launch-at-login', enable),
   getLaunchAtLogin: () => ipcRenderer.invoke('get-launch-at-login'),
   setTheme: (theme: string) => ipcRenderer.invoke('set-theme', theme),
@@ -225,7 +224,6 @@ declare global {
       resizeWindow: (height: number) => void
       setWindowOpacity: (opacity: number) => void
       setTrayIconVisible: (visible: boolean) => Promise<void>
-      setHideOnBlur: (hide: boolean) => Promise<void>
       setLaunchAtLogin: (enable: boolean) => Promise<void>
       getLaunchAtLogin: () => Promise<boolean>
       setTheme: (theme: string) => Promise<void>

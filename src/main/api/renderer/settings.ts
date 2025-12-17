@@ -63,11 +63,6 @@ export class SettingsAPI {
         // 应用托盘图标显示设置
         windowManager.setTrayIconVisible(data.showTrayIcon)
         console.log('启动时应用托盘图标显示设置:', data.showTrayIcon)
-        // 应用失去焦点隐藏设置
-        if (data.hideOnBlur !== undefined) {
-          windowManager.setHideOnBlur(data.hideOnBlur)
-          console.log('启动时应用失去焦点隐藏设置:', data.hideOnBlur)
-        }
         // 应用主题设置
         if (data.theme) {
           this.setTheme(data.theme)

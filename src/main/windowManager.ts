@@ -31,7 +31,6 @@ class WindowManager {
     processId: number
     timestamp: number
   } | null = null // 打开应用前激活的窗口
-  private shouldHideOnBlur = true // 是否在失去焦点时隐藏窗口
   // private _shouldRestoreFocus = true // TODO: 是否在隐藏窗口时恢复焦点（待实现）
   private windowPositionsByDisplay: Record<number, { x: number; y: number }> = {}
 
@@ -125,9 +124,7 @@ class WindowManager {
     })
 
     this.mainWindow.on('blur', () => {
-      if (this.shouldHideOnBlur) {
         this.mainWindow?.hide()
-      }
     })
 
     this.mainWindow.on('show', () => {
@@ -505,13 +502,6 @@ class WindowManager {
         this.trayMenu = null
       }
     }
-  }
-
-  /**
-   * 设置失去焦点时是否隐藏窗口
-   */
-  public setHideOnBlur(hide: boolean): void {
-    this.shouldHideOnBlur = hide
   }
 
   /**
