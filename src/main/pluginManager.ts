@@ -270,49 +270,52 @@ class PluginManager {
   }
 
   // 隐藏插件视图
-  public async hidePluginView(): Promise<void> {
+  public hidePluginView(): void {
     if (this.pluginView && this.mainWindow) {
       const currentPath = this.currentPluginPath
+      const pluginView = this.pluginView
 
       // 发送插件退出事件（isKill=false 表示正常退出）
-      if (!this.pluginView.webContents.isDestroyed()) {
-        this.pluginView.webContents.send('plugin-out', false)
+      if (!pluginView.webContents.isDestroyed()) {
+        pluginView.webContents.send('plugin-out', false)
       }
 
       // 获取插件名称
       const cached = this.pluginViews.find((v) => v.path === currentPath)
       const pluginName = cached?.name
 
-      // 检查是否需要立即销毁 view
-      let shouldKillPlugin = false
-      if (pluginName) {
-        try {
-          const data = await api.dbGet('outKillPlugin')
-          if (data && Array.isArray(data)) {
-            shouldKillPlugin = data.includes(pluginName)
-          }
-        } catch (error) {
-          // 配置不存在或读取失败，保持默认行为（不销毁）
-          console.log('读取 outKillPlugin 配置失败:', error)
-        }
-      }
+      // 仅移除视图以达到隐藏效果，但保留实例以便复用
+      this.mainWindow.contentView.removeChildView(pluginView)
+      console.log('Plugin WebContentsView 已隐藏，缓存保留')
 
-      if (shouldKillPlugin && currentPath) {
-        // 立即销毁插件 view
-        console.log(`插件 ${pluginName} 配置为退出后立即结束，销毁 view`)
-        this.killPlugin(currentPath)
-      } else {
-        // 仅移除视图以达到隐藏效果，但保留实例以便复用
-        this.mainWindow.contentView.removeChildView(this.pluginView)
-
-        // 将当前引用清空，但缓存仍保留
-        this.pluginView = null
-        this.currentPluginPath = null
-        console.log('Plugin WebContentsView 已隐藏，缓存保留')
-      }
+      // 将当前引用清空，但缓存仍保留
+      this.pluginView = null
+      this.currentPluginPath = null
 
       // 通知渲染进程插件已关闭
       this.mainWindow.webContents.send('plugin-closed')
+
+      // 检查是否需要终止插件（延迟异步处理）
+      if (pluginName && currentPath) {
+        this.checkAndKillPlugin(pluginName, currentPath)
+      }
+    }
+  }
+
+  // 检查并终止插件
+  private async checkAndKillPlugin(pluginName: string, pluginPath: string): Promise<void> {
+    // 延迟处理，确保隐藏动画或其他逻辑已完成
+    await new Promise((resolve) => setTimeout(resolve, 200))
+
+    try {
+      const data = await api.dbGet('outKillPlugin')
+      if (data && Array.isArray(data) && data.includes(pluginName)) {
+        console.log(`插件 ${pluginName} 配置为退出后立即结束，销毁 view`)
+        this.killPlugin(pluginPath)
+      }
+    } catch (error) {
+      // 配置不存在或读取失败，保持默认行为（不销毁）
+      console.log('读取 outKillPlugin 配置失败:', error)
     }
   }
 
