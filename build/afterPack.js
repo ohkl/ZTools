@@ -187,7 +187,7 @@ module.exports = async function (context) {
       resourcesPath = path.join(context.appOutDir, 'resources')
     }
 
-    const destInternalPluginsDir = path.join(resourcesPath, 'internal-plugins')
+    const destInternalPluginsDir = path.join(resourcesPath, 'app.asar.unpacked', 'internal-plugins')
 
     for (const pluginName of pluginNames) {
       console.log(`\n正在复制插件: ${pluginName}`)

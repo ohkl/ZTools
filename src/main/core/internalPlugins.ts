@@ -31,6 +31,6 @@ export function getInternalPluginPath(pluginName: InternalPluginName): string {
     return path.resolve(process.cwd(), 'internal-plugins', pluginName)
   } else {
     // 生产环境：从 resources 加载
-    return path.join(process.resourcesPath, 'internal-plugins', pluginName)
+    return path.join(process.resourcesPath, 'app.asar.unpacked', 'internal-plugins', pluginName)
   }
 }
