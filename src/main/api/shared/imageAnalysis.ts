@@ -14,10 +14,10 @@ interface ImageAnalysisResult {
 }
 
 async function analyzeImage(imagePath: string): Promise<ImageAnalysisResult> {
-  // const startTime = performance.now()
+  const startTime = performance.now()
   try {
     // 提取文件名用于日志显示
-    // const fileName = imagePath.split(/[/\\]/).pop() || 'unknown'
+    const fileName = imagePath.split(/[/\\]/).pop() || 'unknown'
 
     // 1. 处理不同格式的图片输入
     let imageBuffer: Buffer
@@ -41,6 +41,13 @@ async function analyzeImage(imagePath: string): Promise<ImageAnalysisResult> {
           .replace(/^file:\\/, '') // file:\path -> path (Windows 特殊情况)
           .replace(/^file:/, '') // file:path -> path
 
+        // 如果是 macOS，需要判断是否为/开头，如果不是需要加/
+        if (process.platform === 'darwin') {
+          if (!filePath.startsWith('/')) {
+            filePath = '/' + filePath
+          }
+        }
+
         // 解码 URL 编码的字符（如 %20 -> 空格）
         filePath = decodeURIComponent(filePath)
 
@@ -49,6 +56,8 @@ async function analyzeImage(imagePath: string): Promise<ImageAnalysisResult> {
           filePath = filePath.replace(/\//g, '\\')
         }
       }
+
+      console.log(`[图标分析] ${fileName} | 路径: ${filePath}`)
 
       // 处理相对路径
       const appPath = app.getAppPath()
@@ -89,8 +98,8 @@ async function analyzeImage(imagePath: string): Promise<ImageAnalysisResult> {
     const bufferHash = crypto.createHash('md5').update(imageBuffer).digest('hex')
     if (analysisCache.has(bufferHash)) {
       if (process.env.NODE_ENV !== 'production' || !is.dev) {
-        // const duration = (performance.now() - startTime).toFixed(2)
-        // console.log(`[图标分析] ${fileName} | 命中缓存 | 耗时:${duration}ms`)
+        const duration = (performance.now() - startTime).toFixed(2)
+        console.log(`[图标分析] ${fileName} | 命中缓存 | 耗时:${duration}ms`)
       }
       return analysisCache.get(bufferHash)!
     }
@@ -200,10 +209,10 @@ async function analyzeImage(imagePath: string): Promise<ImageAnalysisResult> {
     const hexColor = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
 
     // 聚合日志输出
-    // const duration = (performance.now() - startTime).toFixed(2)
-    // console.log(
-    //   `[图标分析] ${fileName} | 耗时:${duration}ms | 颜色数:${colorMap.size} 透明:${(transparencyRatio * 100).toFixed(0)}% 相似度:${(similarityRatio * 100).toFixed(0)}% 主色:${hexColor}(${isDark ? '深' : '浅'}) | ${isPureColorIcon ? '✓纯色' : '✗复杂'}`
-    // )
+    const duration = (performance.now() - startTime).toFixed(2)
+    console.log(
+      `[图标分析] ${fileName} | 耗时:${duration}ms | 颜色数:${colorMap.size} 透明:${(transparencyRatio * 100).toFixed(0)}% 相似度:${(similarityRatio * 100).toFixed(0)}% 主色:${hexColor}(${isDark ? '深' : '浅'}) | ${isPureColorIcon ? '✓纯色' : '✗复杂'}`
+    )
 
     if (!isPureColorIcon) {
       const result = { isSimpleIcon: false, mainColor: null, isDark: false, needsAdaptation: false }
