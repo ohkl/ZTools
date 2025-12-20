@@ -758,8 +758,12 @@ async function handleSettingsClick(): Promise<void> {
     const isAutoKill = outKillPlugins.includes(currentPluginName)
     const isAutoDetach = autoDetachPlugins.includes(currentPluginName)
 
+    // 根据平台显示不同的快捷键
+    const platform = window.ztools.getPlatform()
+    const detachShortcut = platform === 'darwin' ? '⌘+D' : 'Ctrl+D'
+
     const menuItems = [
-      { id: 'detach-plugin', label: '分离到独立窗口 (⌘+D)' },
+      { id: 'detach-plugin', label: `分离到独立窗口 (${detachShortcut})` },
       { id: 'open-devtools', label: '打开开发者工具' },
       {
         label: '插件设置',
