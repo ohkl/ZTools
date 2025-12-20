@@ -686,6 +686,139 @@ class PluginManager {
   }
 
   /**
+   * 直接在独立窗口中创建插件（用于自动分离模式）
+   * @param pluginPath 插件路径
+   * @param featureCode 功能代码
+   * @returns 创建结果
+   */
+  public async createPluginInDetachedWindow(
+    pluginPath: string,
+    featureCode: string
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      console.log('直接在独立窗口中创建插件:', { pluginPath, featureCode })
+
+      // 从数据库查询插件信息
+      let pluginInfoFromDB: any = null
+      try {
+        const plugins = await api.dbGet('plugins')
+        if (plugins && Array.isArray(plugins)) {
+          pluginInfoFromDB = plugins.find((p: any) => p.path === pluginPath)
+        }
+      } catch (error) {
+        console.error('查询插件信息失败:', error)
+      }
+
+      // 读取插件配置
+      const pluginJsonPath = path.join(pluginPath, 'plugin.json')
+      const pluginConfig = JSON.parse(fsSync.readFileSync(pluginJsonPath, 'utf-8'))
+
+      // 确定插件入口文件
+      let pluginUrl: string
+      const isConfigHeadless = !pluginConfig.main
+
+      if (isConfigHeadless) {
+        // 无界面插件不支持独立窗口
+        return { success: false, error: '无界面插件不支持在独立窗口中打开' }
+      } else if (pluginInfoFromDB?.isDevelopment && pluginConfig.development?.main) {
+        // 开发中插件
+        console.log('开发中插件，使用 development.main:', pluginConfig.development.main)
+        pluginUrl = pluginConfig.development.main
+      } else if (pluginConfig.main.startsWith('http')) {
+        // 网络插件
+        console.log('网络插件:', pluginConfig.main)
+        pluginUrl = pluginConfig.main
+      } else {
+        // 生产模式
+        pluginUrl = `file:///${path.join(pluginPath, pluginConfig.main)}`
+      }
+
+      // 确定 preload 脚本路径
+      const preloadPath = pluginConfig.preload
+        ? path.join(pluginPath, pluginConfig.preload)
+        : undefined
+
+      const sess = session.fromPartition('persist:' + pluginConfig.name)
+      sess.registerPreloadScript({
+        type: 'frame',
+        filePath: mainPreload
+      })
+
+      // 创建 WebContentsView
+      const pluginView = new WebContentsView({
+        webPreferences: {
+          contextIsolation: false,
+          nodeIntegration: false,
+          webSecurity: false,
+          sandbox: false,
+          preload: preloadPath,
+          session: sess
+        }
+      })
+
+      // 设置透明背景
+      pluginView.setBackgroundColor('#00000000')
+
+      // 监听插件进程崩溃或退出
+      pluginView.webContents.on('render-process-gone', (_event, details) => {
+        console.log('独立窗口插件进程已退出:', {
+          pluginPath,
+          reason: details.reason,
+          exitCode: details.exitCode
+        })
+      })
+
+      // 获取默认窗口大小
+      const windowWidth = 800
+      const viewHeight = 600 - 59
+
+      // 创建独立窗口
+      const detachedWindow = detachedWindowManager.createDetachedWindow(
+        pluginPath,
+        pluginConfig.name,
+        pluginView,
+        {
+          width: windowWidth,
+          height: viewHeight,
+          title: pluginConfig.name,
+          logo: pluginConfig.logo ? 'file:///' + path.join(pluginPath, pluginConfig.logo) : '',
+          searchQuery: '',
+          searchPlaceholder: '搜索...'
+        }
+      )
+
+      if (!detachedWindow) {
+        // 清理创建的视图
+        if (!pluginView.webContents.isDestroyed()) {
+          pluginView.webContents.close()
+        }
+        return { success: false, error: '创建独立窗口失败' }
+      }
+
+      // 加载插件页面
+      pluginView.webContents.loadURL(pluginUrl)
+
+      // 插件加载完成后注入样式并发送启动事件
+      pluginView.webContents.on('did-finish-load', async () => {
+        // 注入全局滚动条样式
+        pluginView.webContents.insertCSS(GLOBAL_SCROLLBAR_CSS)
+
+        // 发送插件进入事件（独立窗口中的插件总是有界面的）
+        pluginView.webContents.send('on-plugin-enter', api.getLaunchParam())
+      })
+
+      console.log('插件已在独立窗口中创建:', pluginConfig.name)
+      return { success: true }
+    } catch (error: unknown) {
+      console.error('在独立窗口中创建插件失败:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : '未知错误'
+      }
+    }
+  }
+
+  /**
    * 分离当前插件到独立窗口
    * 将当前在主窗口中运行的插件分离到一个独立的窗口中
    */

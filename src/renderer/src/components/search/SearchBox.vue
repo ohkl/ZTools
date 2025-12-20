@@ -669,7 +669,6 @@ onMounted(() => {
             outKillPlugins = data
           }
         } catch (error) {
-          // 配置不存在，使用空数组
           console.debug('未找到outKillPlugin配置', error)
         }
 
@@ -692,6 +691,38 @@ onMounted(() => {
         console.error('切换自动结束配置失败:', error)
         alert(`操作失败: ${error.message || '未知错误'}`)
       }
+    } else if (command === 'toggle-auto-detach') {
+      try {
+        // 读取当前配置
+        let autoDetachPlugins: string[] = []
+        try {
+          const data = await window.ztools.dbGet('autoDetachPlugin')
+          if (data && Array.isArray(data)) {
+            autoDetachPlugins = data
+          }
+        } catch (error) {
+          console.debug('未找到 autoDetachPlugin 配置', error)
+        }
+
+        const currentPluginName = windowStore.currentPlugin!.name
+        const index = autoDetachPlugins.indexOf(currentPluginName)
+
+        if (index !== -1) {
+          // 已存在，移除
+          autoDetachPlugins.splice(index, 1)
+        } else {
+          // 不存在，添加
+          autoDetachPlugins.push(currentPluginName)
+        }
+
+        // 保存到数据库
+        await window.ztools.dbPut('autoDetachPlugin', autoDetachPlugins)
+
+        console.log('已更新 autoDetachPlugin 配置:', autoDetachPlugins)
+      } catch (error: any) {
+        console.error('切换自动分离配置失败:', error)
+        alert(`操作失败: ${error.message || '未知错误'}`)
+      }
     }
   })
 })
@@ -708,18 +739,24 @@ async function handleSettingsClick(): Promise<void> {
 
     // 从数据库读取配置
     let outKillPlugins: string[] = []
+    let autoDetachPlugins: string[] = []
     try {
-      const data = await window.ztools.dbGet('outKillPlugin')
-      if (data && Array.isArray(data)) {
-        outKillPlugins = data
+      const killData = await window.ztools.dbGet('outKillPlugin')
+      if (killData && Array.isArray(killData)) {
+        outKillPlugins = killData
+      }
+      const detachData = await window.ztools.dbGet('autoDetachPlugin')
+      if (detachData && Array.isArray(detachData)) {
+        autoDetachPlugins = detachData
       }
     } catch (error) {
-      console.log('读取 outKillPlugin 配置失败（可能不存在）:', error)
+      console.log('读取配置失败（可能不存在）:', error)
     }
 
     // 检查当前插件是否在列表中
     const currentPluginName = windowStore.currentPlugin.name
     const isAutoKill = outKillPlugins.includes(currentPluginName)
+    const isAutoDetach = autoDetachPlugins.includes(currentPluginName)
 
     const menuItems = [
       { id: 'detach-plugin', label: '分离到独立窗口 (⌘+D)' },
@@ -732,6 +769,12 @@ async function handleSettingsClick(): Promise<void> {
             label: '退出到后台立即结束运行',
             type: 'checkbox',
             checked: isAutoKill
+          },
+          {
+            id: 'toggle-auto-detach',
+            label: '自动分离为独立窗口',
+            type: 'checkbox',
+            checked: isAutoDetach
           }
         ]
       },

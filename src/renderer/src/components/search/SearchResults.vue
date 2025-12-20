@@ -546,6 +546,46 @@ async function handleAppContextMenu(
     })
   }
 
+  // 如果是插件，添加插件设置菜单
+  if (app.type === 'plugin') {
+    // 从数据库读取配置
+    let outKillPlugins: string[] = []
+    let autoDetachPlugins: string[] = []
+    try {
+      const killData = await window.ztools.dbGet('outKillPlugin')
+      if (killData && Array.isArray(killData)) {
+        outKillPlugins = killData
+      }
+      const detachData = await window.ztools.dbGet('autoDetachPlugin')
+      if (detachData && Array.isArray(detachData)) {
+        autoDetachPlugins = detachData
+      }
+    } catch (error) {
+      console.log('读取配置失败:', error)
+    }
+
+    const isAutoKill = outKillPlugins.includes(app.name)
+    const isAutoDetach = autoDetachPlugins.includes(app.name)
+
+    menuItems.push({
+      label: '插件设置',
+      submenu: [
+        {
+          id: `toggle-auto-kill:${app.name}`,
+          label: '退出到后台立即结束运行',
+          type: 'checkbox',
+          checked: isAutoKill
+        },
+        {
+          id: `toggle-auto-detach:${app.name}`,
+          label: '自动分离为独立窗口',
+          type: 'checkbox',
+          checked: isAutoDetach
+        }
+      ]
+    })
+  }
+
   await window.ztools.showContextMenu(menuItems)
 }
 
@@ -791,6 +831,56 @@ async function handleContextMenuCommand(command: string): Promise<void> {
       emit('focus-input')
     } catch (error) {
       console.error('打开文件位置失败:', error)
+    }
+  } else if (command.startsWith('toggle-auto-kill:')) {
+    const pluginName = command.replace('toggle-auto-kill:', '')
+    try {
+      let outKillPlugins: string[] = []
+      try {
+        const data = await window.ztools.dbGet('outKillPlugin')
+        if (data && Array.isArray(data)) {
+          outKillPlugins = data
+        }
+      } catch (error) {
+        console.debug('未找到outKillPlugin配置', error)
+      }
+
+      const index = outKillPlugins.indexOf(pluginName)
+      if (index !== -1) {
+        outKillPlugins.splice(index, 1)
+      } else {
+        outKillPlugins.push(pluginName)
+      }
+
+      await window.ztools.dbPut('outKillPlugin', outKillPlugins)
+      console.log('已更新 outKillPlugin 配置:', outKillPlugins)
+    } catch (error: any) {
+      console.error('切换自动结束配置失败:', error)
+    }
+  } else if (command.startsWith('toggle-auto-detach:')) {
+    const pluginName = command.replace('toggle-auto-detach:', '')
+    try {
+      let autoDetachPlugins: string[] = []
+      try {
+        const data = await window.ztools.dbGet('autoDetachPlugin')
+        if (data && Array.isArray(data)) {
+          autoDetachPlugins = data
+        }
+      } catch (error) {
+        console.debug('未找到 autoDetachPlugin 配置', error)
+      }
+
+      const index = autoDetachPlugins.indexOf(pluginName)
+      if (index !== -1) {
+        autoDetachPlugins.splice(index, 1)
+      } else {
+        autoDetachPlugins.push(pluginName)
+      }
+
+      await window.ztools.dbPut('autoDetachPlugin', autoDetachPlugins)
+      console.log('已更新 autoDetachPlugin 配置:', autoDetachPlugins)
+    } catch (error: any) {
+      console.error('切换自动分离配置失败:', error)
     }
   }
 }

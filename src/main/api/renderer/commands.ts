@@ -225,7 +225,7 @@ export class AppsAPI {
     name?: string // cmd 名称（用于历史记录显示）
     cmdType?: string // cmd 类型（用于判断是否添加历史记录）
   }): Promise<any> {
-    const { path, type, param, name, cmdType } = options
+    const { path: appPath, type, param, name, cmdType } = options
     let { featureCode } = options
     this.launchParam = param || {}
 
@@ -234,7 +234,7 @@ export class AppsAPI {
       if (type === 'plugin') {
         // 如果没有传 featureCode，自动查找第一个非匹配 feature
         if (!featureCode) {
-          const result = await this.getDefaultFeatureCode(path)
+          const result = await this.getDefaultFeatureCode(appPath)
           if (!result.success) {
             // 返回错误给前端
             return { success: false, error: result.error }
@@ -245,7 +245,7 @@ export class AppsAPI {
         // 插件启动参数中添加 featureCode
         this.launchParam.code = featureCode || ''
 
-        console.log('启动插件:', { path, featureCode, name })
+        console.log('启动插件:', { path: appPath, featureCode, name })
 
         // 判断是否为匹配指令，保存状态并添加"上次匹配"到历史记录
         const isMatchCommand = ['img', 'over', 'files', 'regex'].includes(cmdType || '')
@@ -277,29 +277,68 @@ export class AppsAPI {
           })
         } else {
           // 非匹配指令，正常添加到历史记录
-          await this.addToHistory({ path, type, featureCode, param, name, cmdType })
+          await this.addToHistory({ path: appPath, type, featureCode, param, name, cmdType })
         }
 
-        // 通知渲染进程准备显示插件占位区域
-        this.mainWindow?.webContents.send('show-plugin-placeholder')
-
         if (this.pluginManager) {
-          this.pluginManager.createPluginView(path, featureCode || '')
+          // 检查是否配置为自动分离
+          let shouldAutoDetach = false
+          try {
+            // 获取插件名称 (需从 path 读取 plugin.json)
+            const pluginJsonPath = path.join(appPath, 'plugin.json')
+            const pluginConfig = JSON.parse(await fs.readFile(pluginJsonPath, 'utf-8'))
+
+            const autoDetachPlugins = await databaseAPI.dbGet('autoDetachPlugin')
+            if (
+              autoDetachPlugins &&
+              Array.isArray(autoDetachPlugins) &&
+              autoDetachPlugins.includes(pluginConfig.name)
+            ) {
+              shouldAutoDetach = true
+              console.log(`插件 ${pluginConfig.name} 配置为自动分离，直接在独立窗口中创建`)
+            }
+          } catch (error) {
+            console.error('检查自动分离配置失败:', error)
+          }
+
+          if (shouldAutoDetach) {
+            // 直接在独立窗口中创建插件
+            const result = await this.pluginManager.createPluginInDetachedWindow(
+              appPath,
+              featureCode || ''
+            )
+
+            if (!result.success) {
+              console.error('在独立窗口中创建插件失败:', result.error)
+              // 如果创建失败，降级到主窗口模式
+              this.mainWindow?.webContents.send('show-plugin-placeholder')
+              await this.pluginManager.createPluginView(appPath, featureCode || '')
+            } else {
+              // 创建成功，隐藏主窗口
+              this.mainWindow?.hide()
+            }
+          } else {
+            // 通知渲染进程准备显示插件占位区域
+            this.mainWindow?.webContents.send('show-plugin-placeholder')
+
+            // 在主窗口中创建插件
+            await this.pluginManager.createPluginView(appPath, featureCode || '')
+          }
         }
 
         return { success: true }
       } else {
         // 直接启动（app 或 system-setting）
-        if (path.startsWith('ms-settings:')) {
+        if (appPath.startsWith('ms-settings:')) {
           // 系统设置
-          await shell.openExternal(path)
+          await shell.openExternal(appPath)
         } else {
           // 普通应用
-          await launchApp(path)
+          await launchApp(appPath)
         }
 
         // 添加到历史记录
-        await this.addToHistory({ path, type: 'app', name, cmdType: 'text' })
+        await this.addToHistory({ path: appPath, type: 'app', name, cmdType: 'text' })
 
         // 通知渲染进程应用已启动（清空搜索框等）
         this.mainWindow?.webContents.send('app-launched')
