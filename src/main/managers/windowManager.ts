@@ -229,6 +229,7 @@ class WindowManager {
       // 暗色模式用 light（白色图标），亮色模式用 dark（黑色图标）
       // const iconPath = nativeTheme.shouldUseDarkColors ? trayIconLight : trayIcon
       icon = nativeImage.createFromPath(windowsIcon)
+      icon.setTemplateImage(false)
     }
 
     this.tray = new Tray(icon)
