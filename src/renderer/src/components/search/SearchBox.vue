@@ -245,7 +245,7 @@ const dragCounter = ref(0) // 拖动计数器，处理嵌套元素的 dragenter/
 watch(
   () => composingText.value,
   (newValue) => {
-    console.log('composingText 更改了', newValue)
+    // console.log('composingText 更改了', newValue)
     // 输入法组合中的文本也应该影响宽度
     if (
       newValue &&
@@ -286,7 +286,7 @@ function onCompositionEnd(event: Event): void {
 }
 
 function onInput(event: Event): void {
-  console.log('onInput', event)
+  // console.log('onInput', event)
   // 如果正在输入法组合中,不触发更新
   if (isComposing.value) {
     composingText.value = (event.target as HTMLInputElement).value
@@ -625,7 +625,7 @@ function updateInputWidth(): void {
 
       // 设置输入框宽度
       inputRef.value.style.width = `${width}px`
-      console.log('inputWidth.value', width, 'hasContent', !!props.modelValue)
+      // console.log('inputWidth.value', width, 'hasContent', !!props.modelValue)
     }
   })
 }

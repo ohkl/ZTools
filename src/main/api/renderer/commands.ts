@@ -436,7 +436,8 @@ export class AppsAPI {
               icon: featureIcon,
               type: 'plugin',
               featureCode: featureCode,
-              pluginExplain: feature?.explain || ''
+              pluginExplain: feature?.explain || '',
+              cmdType: cmdType || 'text' // ✅ 添加 cmdType
             }
           } catch (error) {
             console.error('读取插件配置失败:', error)

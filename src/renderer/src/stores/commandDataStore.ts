@@ -176,13 +176,11 @@ export const useCommandDataStore = defineStore('commandData', () => {
 
       // 监听后端历史记录变化事件
       window.ztools.onHistoryChanged(() => {
-        console.log('收到历史记录变化通知，重新加载')
         loadHistoryData()
       })
 
       // 监听指令列表变化事件（应用文件夹变化时触发）
       window.ztools.onAppsChanged(() => {
-        console.log('收到指令列表变化通知，重新加载')
         loadCommands()
       })
 
@@ -190,16 +188,13 @@ export const useCommandDataStore = defineStore('commandData', () => {
       window.ztools.onPinnedChanged(() => {
         // 如果是本地触发的更新，忽略此事件，避免重复加载
         if (isLocalPinnedUpdate) {
-          console.log('忽略自己触发的固定列表变化通知')
           isLocalPinnedUpdate = false
           return
         }
-        console.log('收到固定列表变化通知，重新加载')
         loadPinnedData()
       })
 
       isInitialized.value = true
-      console.log('指令数据初始化完成')
     } catch (error) {
       console.error('初始化指令数据失败:', error)
       history.value = []
@@ -219,11 +214,6 @@ export const useCommandDataStore = defineStore('commandData', () => {
         // 创建当前所有指令的 path Set（用于验证历史记录是否仍然有效）
         const currentCommandPaths = new Set(commands.value.map((cmd) => cmd.path))
 
-        console.log(`当前指令列表数量: ${commands.value.length}`)
-        console.log(`历史记录数量: ${data.length}`)
-
-        let needsSave = false
-
         // 过滤掉已卸载的插件、无效的指令，并清理系统设置的旧图标路径
         const filteredData = data
           .filter((item: any) => {
@@ -235,10 +225,6 @@ export const useCommandDataStore = defineStore('commandData', () => {
             // 检查所有类型的历史记录（包括插件、应用、系统设置等）
             // 如果在当前指令列表中找不到，就清理掉
             if (!currentCommandPaths.has(item.path)) {
-              console.log(
-                `清理无效指令的历史记录: ${item.name} (type: ${item.type}, path: ${item.path})`
-              )
-              needsSave = true
               return false
             }
 
@@ -249,10 +235,8 @@ export const useCommandDataStore = defineStore('commandData', () => {
 
             // 1. 迁移旧的系统设置数据格式：type: "system-setting" -> type: "direct", subType: "system-setting"
             if (item.type === 'system-setting') {
-              needsSave = true
               cleanedItem.type = 'direct'
               cleanedItem.subType = 'system-setting'
-              console.log(`迁移系统设置数据格式: ${item.name}`)
             }
 
             // 2. 清理系统设置和特殊指令的旧图标路径
@@ -261,9 +245,7 @@ export const useCommandDataStore = defineStore('commandData', () => {
               cleanedItem.path?.startsWith('special:')
             ) {
               if (cleanedItem.icon) {
-                needsSave = true
                 delete cleanedItem.icon
-                console.log(`清理历史记录中的旧图标: ${item.name}`)
               }
             }
 
@@ -272,13 +254,6 @@ export const useCommandDataStore = defineStore('commandData', () => {
 
         // 直接赋值，避免先清空再设置导致的闪烁
         history.value = filteredData
-
-        // 数据迁移已完成，不再需要保存
-        // needsSave 标记仅用于记录迁移日志
-        if (needsSave) {
-          console.log('检测到需要迁移的旧数据格式，已在前端处理')
-          console.log('注意：历史记录的修改应该通过后端 API 完成，前端不直接保存')
-        }
       } else {
         history.value = []
       }
@@ -321,7 +296,6 @@ export const useCommandDataStore = defineStore('commandData', () => {
   // 重新加载历史记录和固定列表（用于插件卸载后刷新）
   async function reloadUserData(): Promise<void> {
     await Promise.all([loadHistoryData(), loadPinnedData()])
-    console.log('已刷新历史记录和固定列表')
   }
 
   // 加载指令列表
@@ -350,35 +324,49 @@ export const useCommandDataStore = defineStore('commandData', () => {
 
       for (const plugin of plugins) {
         if (plugin.features && Array.isArray(plugin.features) && plugin.features.length > 0) {
+          // 检查是否有 feature 的 cmd 名称与插件名称相同
+          const hasPluginNameCmd = plugin.features.some((feature: any) =>
+            feature.cmds?.some(
+              (cmd: any) => (typeof cmd === 'string' ? cmd : cmd.label) === plugin.name
+            )
+          )
+
           // 1. 插件名称本身作为一个指令（不关联具体 feature）
-          let defaultFeatureCode: string | undefined = undefined
-          // 如果插件没有指定 main，则默认启动第一个非匹配指令的功能
-          if (!plugin.main && plugin.features) {
-            for (const feature of plugin.features) {
-              if (feature.cmds && Array.isArray(feature.cmds)) {
-                // 查找是否存在字符串类型的指令（即普通文本指令）
-                const hasTextCmd = feature.cmds.some((cmd: any) => typeof cmd === 'string')
-                if (hasTextCmd) {
-                  defaultFeatureCode = feature.code
-                  break
+          // 如果已经有同名的 feature cmd，则跳过插件名称指令，避免重复
+          if (!hasPluginNameCmd) {
+            let defaultFeatureCode: string | undefined = undefined
+            // 如果插件没有指定 main，则默认启动第一个非匹配指令的功能
+            if (!plugin.main && plugin.features) {
+              for (const feature of plugin.features) {
+                if (feature.cmds && Array.isArray(feature.cmds)) {
+                  // 查找是否存在字符串类型的指令（即普通文本指令）
+                  const hasTextCmd = feature.cmds.some((cmd: any) => typeof cmd === 'string')
+                  if (hasTextCmd) {
+                    defaultFeatureCode = feature.code
+                    break
+                  }
                 }
               }
             }
-          }
 
-          pluginItems.push({
-            name: plugin.name,
-            path: plugin.path,
-            icon: plugin.logo,
-            type: 'plugin',
-            featureCode: defaultFeatureCode,
-            pinyin: pinyin(plugin.name, { toneType: 'none', type: 'string' })
-              .replace(/\s+/g, '')
-              .toLowerCase(),
-            pinyinAbbr: pinyin(plugin.name, { pattern: 'first', toneType: 'none', type: 'string' })
-              .replace(/\s+/g, '')
-              .toLowerCase()
-          })
+            pluginItems.push({
+              name: plugin.name,
+              path: plugin.path,
+              icon: plugin.logo,
+              type: 'plugin',
+              featureCode: defaultFeatureCode,
+              pinyin: pinyin(plugin.name, { toneType: 'none', type: 'string' })
+                .replace(/\s+/g, '')
+                .toLowerCase(),
+              pinyinAbbr: pinyin(plugin.name, {
+                pattern: 'first',
+                toneType: 'none',
+                type: 'string'
+              })
+                .replace(/\s+/g, '')
+                .toLowerCase()
+            })
+          }
 
           // 2. 每个 feature 的每个 cmd 都作为独立的指令
           for (const feature of plugin.features) {
@@ -658,11 +646,6 @@ export const useCommandDataStore = defineStore('commandData', () => {
   // 搜索支持图片的指令
   function searchImageCommands(): SearchResult[] {
     const result = regexCommands.value.filter((cmd) => cmd.matchCmd?.type === 'img')
-    console.log('searchImageCommands:', {
-      total: regexCommands.value.length,
-      imgCommands: result.length,
-      allTypes: regexCommands.value.map((c) => c.matchCmd?.type)
-    })
     // 应用特殊指令配置
     return result.map((cmd) => applySpecialConfig(cmd))
   }
@@ -683,14 +666,6 @@ export const useCommandDataStore = defineStore('commandData', () => {
       const maxLength = cmd.matchCmd.maxLength ?? 10000
 
       return textLength >= minLength && textLength <= maxLength
-    })
-
-    console.log('searchTextCommands:', {
-      total: regexCommands.value.length,
-      textLength: pastedText.length,
-      overCommands: regexCommands.value.filter((c) => c.matchCmd?.type === 'over').length,
-      matched: result.length,
-      allTypes: regexCommands.value.map((c) => c.matchCmd?.type)
     })
 
     // 应用特殊指令配置
@@ -715,35 +690,18 @@ export const useCommandDataStore = defineStore('commandData', () => {
       const minLength = filesCmd.minLength ?? 1
       const maxLength = filesCmd.maxLength ?? 10000
 
-      console.log(`检查指令 "${cmd.name}":`, {
-        fileCount,
-        minLength,
-        maxLength,
-        countCheck: fileCount >= minLength && fileCount <= maxLength
-      })
-
       if (fileCount < minLength || fileCount > maxLength) {
-        console.log(`❌ 指令 "${cmd.name}" 文件数量不符合`)
         return false
       }
 
       // 2. 检查每个文件是否满足条件
       const allFilesMatch = pastedFiles.every((file) => {
-        console.log(`检查文件 "${file.name}":`, {
-          isDirectory: file.isDirectory,
-          fileType: filesCmd.fileType,
-          extensions: filesCmd.extensions,
-          match: filesCmd.match
-        })
-
         // 2.1 检查文件类型（file 或 directory）
         if (filesCmd.fileType) {
           if (filesCmd.fileType === 'file' && file.isDirectory) {
-            console.log(`❌ 文件 "${file.name}" 类型不匹配：需要文件但是文件夹`)
             return false
           }
           if (filesCmd.fileType === 'directory' && !file.isDirectory) {
-            console.log(`❌ 文件 "${file.name}" 类型不匹配：需要文件夹但是文件`)
             return false
           }
         }
@@ -752,9 +710,7 @@ export const useCommandDataStore = defineStore('commandData', () => {
         if (filesCmd.extensions && !file.isDirectory) {
           const ext = file.name.split('.').pop()?.toLowerCase()
           const allowedExts = filesCmd.extensions.map((e) => e.toLowerCase())
-          console.log(`检查扩展名: ${ext}, 允许的: [${allowedExts.join(', ')}]`)
           if (!ext || !allowedExts.includes(ext)) {
-            console.log(`❌ 文件 "${file.name}" 扩展名不匹配`)
             return false
           }
         }
@@ -765,9 +721,7 @@ export const useCommandDataStore = defineStore('commandData', () => {
             const matchStr = filesCmd.match.replace(/^\/|\/[gimuy]*$/g, '')
             const regex = new RegExp(matchStr)
             const testResult = regex.test(file.name)
-            console.log(`检查正则匹配: ${matchStr}, 结果: ${testResult}`)
             if (!testResult) {
-              console.log(`❌ 文件 "${file.name}" 正则不匹配`)
               return false
             }
           } catch (error) {
@@ -776,26 +730,10 @@ export const useCommandDataStore = defineStore('commandData', () => {
           }
         }
 
-        console.log(`✅ 文件 "${file.name}" 通过所有检查`)
         return true
       })
 
-      if (allFilesMatch) {
-        console.log(`✅ 指令 "${cmd.name}" 匹配成功`)
-      } else {
-        console.log(`❌ 指令 "${cmd.name}" 部分文件不匹配`)
-      }
-
       return allFilesMatch
-    })
-
-    console.log('searchFileCommands:', {
-      total: regexCommands.value.length,
-      fileCount: pastedFiles.length,
-      filesCommands: regexCommands.value.filter((c) => c.matchCmd?.type === 'files').length,
-      matched: result.length,
-      allTypes: regexCommands.value.map((c) => c.matchCmd?.type),
-      pastedFiles: pastedFiles.map((f) => ({ name: f.name, isDir: f.isDirectory }))
     })
 
     // 应用特殊指令配置

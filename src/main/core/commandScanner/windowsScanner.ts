@@ -6,6 +6,15 @@ import path from 'path'
 import { getWindowsStartMenuPaths } from '../../utils/systemPaths'
 import { Command } from './types'
 
+// 动态加载原生模块（避免启动时加载失败）
+let extractFileIcon: ((path: string, size: number) => string) | null = null
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  extractFileIcon = require('extract-file-icon')
+} catch (error) {
+  console.error('加载 extract-file-icon 失败:', error)
+}
+
 // ========== 配置 ==========
 
 // 图标缓存目录
@@ -86,10 +95,13 @@ async function extractIcon(appPath: string, appName: string): Promise<string> {
       return iconPath
     }
 
+    // 检查模块是否加载成功
+    if (!extractFileIcon) {
+      return iconPath
+    }
+
     // 使用 extract-file-icon 提取图标
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const fileIcon = require('extract-file-icon')
-    const buffer = fileIcon(appPath, 32)
+    const buffer = extractFileIcon(appPath, 32)
 
     // 保存图标
     await fsPromises.writeFile(iconPath, buffer, 'base64')
@@ -201,10 +213,22 @@ export async function scanApplications(): Promise<Command[]> {
       await scanDirectory(menuPath, apps)
     }
 
-    const endTime = performance.now()
-    console.log(`扫描完成: ${apps.length} 个应用, 耗时 ${(endTime - startTime).toFixed(0)}ms`)
+    // 去重：按路径的小写形式去重（Windows 不区分大小写）
+    const uniqueApps = new Map<string, Command>()
+    apps.forEach((app) => {
+      const lowerPath = app.path.toLowerCase()
+      if (!uniqueApps.has(lowerPath)) {
+        uniqueApps.set(lowerPath, app)
+      }
+    })
+    const deduplicatedApps = Array.from(uniqueApps.values())
 
-    return apps
+    const endTime = performance.now()
+    console.log(
+      `扫描完成: ${apps.length} 个应用 -> 去重后 ${deduplicatedApps.length} 个, 耗时 ${(endTime - startTime).toFixed(0)}ms`
+    )
+
+    return deduplicatedApps
   } catch (error) {
     console.error('扫描应用失败:', error)
     return []

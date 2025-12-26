@@ -742,7 +742,6 @@ async function handleAppContextMenu(
 
 // 选择应用
 async function handleSelectApp(app: any): Promise<void> {
-  console.log('选择应用:', app)
   try {
     // 如果是"上次匹配"指令，执行恢复逻辑
     if (app.path === 'special:last-match') {
