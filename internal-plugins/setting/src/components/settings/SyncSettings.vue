@@ -183,14 +183,32 @@ async function loadUnsyncedCount(): Promise<void> {
 
 // 同步开关切换
 async function handleSyncToggle(): Promise<void> {
-  if (!syncEnabled.value) {
-    // 关闭同步
-    try {
+  try {
+    if (!syncEnabled.value) {
+      // 关闭同步
       await window.ztools.internal.syncStopAutoSync()
       syncStatus.value = false
-    } catch (error) {
-      console.error('停止同步失败:', error)
     }
+
+    // 保存开关状态到数据库
+    const result = await window.ztools.internal.syncSaveConfig({
+      enabled: syncEnabled.value,
+      serverUrl: config.value.serverUrl,
+      username: config.value.username,
+      password: config.value.password,
+      syncInterval: config.value.syncInterval
+    })
+
+    if (!result.success) {
+      error(`保存状态失败：${result.error}`)
+      // 回滚开关状态
+      syncEnabled.value = !syncEnabled.value
+    }
+  } catch (err: any) {
+    console.error('切换同步状态失败:', err)
+    error(`操作失败：${err.message}`)
+    // 回滚开关状态
+    syncEnabled.value = !syncEnabled.value
   }
 }
 
