@@ -171,8 +171,11 @@ export class LocalShortcutsAPI {
           // Windows: 直接使用 .exe 或 .lnk 路径
           icon = `ztools-icon://${encodeURIComponent(selectedPath)}`
         }
+      } else if (type === 'folder' && process.platform === 'win32') {
+        // Windows 文件夹：使用 ztools-icon:// 协议获取系统文件夹图标
+        icon = `ztools-icon://${encodeURIComponent(selectedPath)}`
       } else {
-        // 普通文件和文件夹使用 base64 图标
+        // 其他情况（macOS 文件夹、普通文件）使用 app.getFileIcon 获取系统图标
         try {
           const iconData = await app.getFileIcon(selectedPath, { size: 'normal' })
           icon = iconData.toDataURL()
@@ -271,8 +274,11 @@ export class LocalShortcutsAPI {
           // Windows: 直接使用 .exe 或 .lnk 路径
           icon = `ztools-icon://${encodeURIComponent(selectedPath)}`
         }
+      } else if (type === 'folder' && process.platform === 'win32') {
+        // Windows 文件夹：使用 ztools-icon:// 协议获取系统文件夹图标
+        icon = `ztools-icon://${encodeURIComponent(selectedPath)}`
       } else {
-        // 普通文件和文件夹使用 base64 图标
+        // 其他情况（macOS 文件夹、普通文件）使用 app.getFileIcon 获取系统图标
         try {
           const iconData = await app.getFileIcon(selectedPath, { size: 'normal' })
           icon = iconData.toDataURL()
