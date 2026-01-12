@@ -89,7 +89,9 @@ class PluginManager {
         // 通知渲染进程插件已打开
         this.mainWindow?.webContents.send('plugin-opened', {
           name: pluginConfig.name,
-          logo: pluginConfig.logo ? pathToFileURL(path.join(pluginPath, pluginConfig.logo)).href : '',
+          logo: pluginConfig.logo
+            ? pathToFileURL(path.join(pluginPath, pluginConfig.logo)).href
+            : '',
           path: pluginPath,
           subInputPlaceholder: cached.subInputPlaceholder || '搜索',
           subInputVisible: cached.subInputVisible !== undefined ? cached.subInputVisible : true
@@ -870,7 +872,9 @@ class PluginManager {
           width: windowWidth,
           height: viewHeight,
           title: pluginConfig.name,
-          logo: pluginConfig.logo ? pathToFileURL(path.join(pluginPath, pluginConfig.logo)).href : '',
+          logo: pluginConfig.logo
+            ? pathToFileURL(path.join(pluginPath, pluginConfig.logo)).href
+            : '',
           searchQuery: '',
           searchPlaceholder: '搜索...'
         }

@@ -225,6 +225,13 @@ const api = {
   restoreLastMatch: () => ipcRenderer.invoke('restore-last-match'),
   // 使用统计管理
   getUsageStats: () => ipcRenderer.invoke('get-usage-stats'),
+  // 本地启动管理
+  localShortcuts: {
+    getAll: () => ipcRenderer.invoke('local-shortcuts:get-all'),
+    add: () => ipcRenderer.invoke('local-shortcuts:add'),
+    delete: (id: string) => ipcRenderer.invoke('local-shortcuts:delete', id),
+    open: (path: string) => ipcRenderer.invoke('local-shortcuts:open', path)
+  },
   // 文件系统检查（异步，通过主进程）
   checkFilePaths: (paths: string[]) => ipcRenderer.invoke('check-file-paths', paths),
   // 获取拖放文件的路径（Electron webUtils）

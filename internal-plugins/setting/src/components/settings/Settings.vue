@@ -36,6 +36,9 @@
 
       <!-- 所有指令 -->
       <AllCommands v-if="activeMenu === 'all-commands'" />
+
+      <!-- 本地启动 -->
+      <LocalLaunch v-if="activeMenu === 'local-launch'" />
     </div>
   </div>
 </template>
@@ -47,6 +50,7 @@ import AllCommands from './AllCommands.vue'
 import DataManagement from './DataManagement.vue'
 import GeneralSettings from './GeneralSettings.vue'
 import GlobalShortcuts from './GlobalShortcuts.vue'
+import LocalLaunch from './LocalLaunch.vue'
 import PluginCenter from './PluginCenter.vue'
 import PluginMarket from './PluginMarket.vue'
 import SyncSettings from './SyncSettings.vue'
@@ -66,7 +70,7 @@ const emit = defineEmits<{
 // 菜单项类型
 interface MenuItem {
   id: string
-  icon: 'settings' | 'plugin' | 'keyboard' | 'store' | 'database' | 'list' | 'cloud'
+  icon: 'settings' | 'plugin' | 'keyboard' | 'store' | 'database' | 'list' | 'cloud' | 'folder'
   label: string
 }
 
@@ -78,6 +82,7 @@ const menuItems: MenuItem[] = [
   { id: 'market', icon: 'store', label: '插件市场' },
   { id: 'data', icon: 'database', label: '我的数据' },
   { id: 'all-commands', icon: 'list', label: '所有指令' },
+  { id: 'local-launch', icon: 'folder', label: '本地启动' },
   { id: 'sync', icon: 'cloud', label: 'WebDAV 同步' }
 ]
 

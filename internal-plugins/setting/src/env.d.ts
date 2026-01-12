@@ -18,6 +18,9 @@ declare global {
   interface Window {
     services: Services
     ztools: {
+      // 获取拖放文件的路径（Electron webUtils）
+      getPathForFile: (file: File) => string
+
       internal: {
         // 数据库操作（主程序专用，直接操作 ZTOOLS 命名空间）
         dbPut: (key: string, data: any) => Promise<any>
@@ -150,6 +153,27 @@ declare global {
           commands: any[]
           regexCommands: any[]
         }>
+
+        // 本地启动管理
+        localShortcuts: {
+          getAll: () => Promise<
+            Array<{
+              id: string
+              name: string
+              path: string
+              type: 'file' | 'folder' | 'app'
+              icon?: string
+              keywords?: string[]
+              pinyin?: string
+              pinyinAbbr?: string
+              addedAt: number
+            }>
+          >
+          add: () => Promise<{ success: boolean; error?: string }>
+          addByPath: (filePath: string) => Promise<{ success: boolean; error?: string }>
+          delete: (id: string) => Promise<{ success: boolean; error?: string }>
+          open: (path: string) => Promise<{ success: boolean; error?: string }>
+        }
 
         // 图片分析
         analyzeImage: (imagePath: string) => Promise<{

@@ -53,11 +53,7 @@ const SKIP_TARGET_PATTERN =
   /^uninstall|^uninst|^unins\d+$|^unwise|^_uninst|^setup$|^install|^instmsi|卸载程序|安装程序/i
 
 // Windows 系统目录（不应该扫描这些目录中的应用）
-const SYSTEM_DIRECTORIES = [
-  'c:\\windows\\',
-  'c:\\windows\\system32\\',
-  'c:\\windows\\syswow64\\'
-]
+const SYSTEM_DIRECTORIES = ['c:\\windows\\', 'c:\\windows\\system32\\', 'c:\\windows\\syswow64\\']
 
 // ========== 辅助函数 ==========
 

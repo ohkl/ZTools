@@ -246,7 +246,14 @@ onMounted(async () => {
       subInputVisible.value = data.subInputVisible
     }
 
-    console.log('插件 Logo:', pluginLogo.value, '搜索框初始值:', searchQuery.value, '子输入框可见:', subInputVisible.value)
+    console.log(
+      '插件 Logo:',
+      pluginLogo.value,
+      '搜索框初始值:',
+      searchQuery.value,
+      '子输入框可见:',
+      subInputVisible.value
+    )
   })
 
   // 监听置顶状态变化

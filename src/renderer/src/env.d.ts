@@ -258,6 +258,25 @@ declare global {
           useCount: number
         }>
       >
+      // 本地启动管理
+      localShortcuts: {
+        getAll: () => Promise<
+          Array<{
+            id: string
+            name: string
+            path: string
+            type: 'file' | 'folder' | 'app'
+            icon?: string
+            keywords?: string[]
+            pinyin?: string
+            pinyinAbbr?: string
+            addedAt: number
+          }>
+        >
+        add: () => Promise<{ success: boolean; error?: string }>
+        delete: (id: string) => Promise<{ success: boolean; error?: string }>
+        open: (path: string) => Promise<{ success: boolean; error?: string }>
+      }
       // 文件系统检查（异步，通过主进程）
       checkFilePaths: (
         paths: string[]

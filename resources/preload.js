@@ -22,6 +22,8 @@ const osType = electron.ipcRenderer.sendSync('get-os-type')
 
 window.ztools = {
   getAppName: () => 'ZTools',
+  // 获取拖放文件的路径（Electron webUtils）
+  getPathForFile: (file) => electron.webUtils.getPathForFile(file),
   // 平台检测
   isMacOs: () => osType === 'Darwin',
   isMacOS: () => osType === 'Darwin',
@@ -341,6 +343,16 @@ window.ztools = {
     // ==================== 指令管理 API ====================
     getCommands: async () => await electron.ipcRenderer.invoke('internal:get-commands'),
 
+    // ==================== 本地启动管理 API ====================
+    localShortcuts: {
+      getAll: async () => await electron.ipcRenderer.invoke('local-shortcuts:get-all'),
+      add: async () => await electron.ipcRenderer.invoke('local-shortcuts:add'),
+      addByPath: async (filePath) =>
+        await electron.ipcRenderer.invoke('local-shortcuts:add-by-path', filePath),
+      delete: async (id) => await electron.ipcRenderer.invoke('local-shortcuts:delete', id),
+      open: async (path) => await electron.ipcRenderer.invoke('local-shortcuts:open', path)
+    },
+
     // ==================== 插件管理 API ====================
     getPlugins: async () => await electron.ipcRenderer.invoke('internal:get-plugins'),
     importPlugin: async () => await electron.ipcRenderer.invoke('internal:import-plugin'),
@@ -423,7 +435,11 @@ window.ztools = {
       await electron.ipcRenderer.invoke('internal:update-primary-color', primaryColor, customColor),
     // 通知主渲染进程更新亚克力透明度
     updateAcrylicOpacity: async (lightOpacity, darkOpacity) =>
-      await electron.ipcRenderer.invoke('internal:update-acrylic-opacity', lightOpacity, darkOpacity),
+      await electron.ipcRenderer.invoke(
+        'internal:update-acrylic-opacity',
+        lightOpacity,
+        darkOpacity
+      ),
 
     // 监听窗口材质更新
     onUpdateWindowMaterial: (callback) => {

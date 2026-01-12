@@ -1,5 +1,6 @@
 import { ipcMain, clipboard, nativeImage } from 'electron'
 import os from 'os'
+import plist from 'simple-plist'
 import { ClipboardMonitor } from '../../core/native'
 
 /**
@@ -68,7 +69,6 @@ export class PluginClipboardAPI {
         } else if (os.platform() === 'darwin') {
           // macOS 使用 Electron API（原生 API 暂不支持）
           // macOS 需要使用 plist 格式
-          const plist = require('simple-plist')
           const plistData = plist.stringify(files)
           clipboard.writeBuffer('NSFilenamesPboardType', Buffer.from(plistData))
         }

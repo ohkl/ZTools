@@ -8,12 +8,13 @@ import updaterAPI from './updater'
 
 // 主程序渲染进程专用API
 import appsAPI from './renderer/commands'
+import localShortcutsAPI from './renderer/localShortcuts'
 import pluginsAPI from './renderer/plugins'
 import settingsAPI from './renderer/settings'
+import syncAPI from './renderer/sync'
 import systemAPI from './renderer/system'
 import { systemSettingsAPI } from './renderer/systemSettings'
 import windowAPI from './renderer/window'
-import syncAPI from './renderer/sync'
 
 // 插件专用API
 import windowManager from '../managers/windowManager'
@@ -59,6 +60,7 @@ class APIManager {
     systemAPI.init(mainWindow)
     systemSettingsAPI.init()
     syncAPI.init()
+    localShortcutsAPI.init(mainWindow)
 
     // 初始化插件API
     pluginLifecycleAPI.init(mainWindow, pluginManager)

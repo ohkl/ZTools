@@ -53,6 +53,7 @@ export type CommandType =
 export type CommandSubType =
   | 'app' // 系统应用
   | 'system-setting' // 系统设置
+  | 'local-shortcut' // 本地启动项
 
 // Command 接口（原 App 接口）
 export interface Command {
@@ -463,12 +464,30 @@ export const useCommandDataStore = defineStore('commandData', () => {
         console.error('加载系统设置失败:', error)
       }
 
+      // 4. 加载本地启动项
+      let localShortcuts: Command[] = []
+      try {
+        const shortcuts = await window.ztools.localShortcuts.getAll()
+        localShortcuts = shortcuts.map((s: any) => ({
+          name: s.name,
+          path: s.path,
+          icon: s.icon,
+          type: 'direct' as const,
+          subType: 'local-shortcut' as const,
+          pinyin: s.pinyin || '',
+          pinyinAbbr: s.pinyinAbbr || '',
+          cmdType: 'text' as const
+        }))
+      } catch (error) {
+        console.error('加载本地启动项失败:', error)
+      }
+
       // 合并所有指令
-      commands.value = [...appItems, ...pluginItems, ...settingCommands]
+      commands.value = [...appItems, ...pluginItems, ...settingCommands, ...localShortcuts]
       regexCommands.value = regexItems
 
       console.log(
-        `加载了 ${appItems.length} 个应用指令, ${pluginItems.length} 个插件指令, ${settingCommands.length} 个系统设置指令, ${regexItems.length} 个匹配指令`
+        `加载了 ${appItems.length} 个应用指令, ${pluginItems.length} 个插件指令, ${settingCommands.length} 个系统设置指令, ${localShortcuts.length} 个本地启动项, ${regexItems.length} 个匹配指令`
       )
 
       // 初始化 Fuse.js 搜索引擎

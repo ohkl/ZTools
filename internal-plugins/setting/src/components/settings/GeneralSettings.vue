@@ -686,7 +686,10 @@ async function handleAcrylicLightOpacityChange(): Promise<void> {
   try {
     await saveSettings()
     // 通知主渲染进程更新（主渲染进程会应用 CSS 叠加效果）
-    await window.ztools.internal.updateAcrylicOpacity(acrylicLightOpacity.value, acrylicDarkOpacity.value)
+    await window.ztools.internal.updateAcrylicOpacity(
+      acrylicLightOpacity.value,
+      acrylicDarkOpacity.value
+    )
   } catch (error) {
     console.error('更新亚克力明亮模式透明度失败:', error)
   }
@@ -697,7 +700,10 @@ async function handleAcrylicDarkOpacityChange(): Promise<void> {
   try {
     await saveSettings()
     // 通知主渲染进程更新（主渲染进程会应用 CSS 叠加效果）
-    await window.ztools.internal.updateAcrylicOpacity(acrylicLightOpacity.value, acrylicDarkOpacity.value)
+    await window.ztools.internal.updateAcrylicOpacity(
+      acrylicLightOpacity.value,
+      acrylicDarkOpacity.value
+    )
   } catch (error) {
     console.error('更新亚克力暗黑模式透明度失败:', error)
   }

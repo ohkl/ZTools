@@ -216,7 +216,12 @@ export class AppsAPI {
         }
 
         // 添加到历史记录
-        await this.addToHistory({ path: appPath, type: 'builtin', name: name || 'Clear', cmdType: 'text' })
+        await this.addToHistory({
+          path: appPath,
+          type: 'builtin',
+          name: name || 'Clear',
+          cmdType: 'text'
+        })
 
         // 通知渲染进程清空搜索框等
         this.mainWindow?.webContents.send('app-launched')
@@ -327,13 +332,26 @@ export class AppsAPI {
 
         return { success: true }
       } else {
-        // 直接启动（app 或 system-setting）
+        // 直接启动（app 或 system-setting 或 local-shortcut）
         if (appPath.startsWith('ms-settings:')) {
           // 系统设置
           await shell.openExternal(appPath)
         } else {
-          // 普通应用
-          await launchApp(appPath, confirmDialog)
+          // 检查是否为本地启动项
+          const localShortcuts = await databaseAPI.dbGet('local-shortcuts')
+          const isLocalShortcut = localShortcuts?.some((s: any) => s.path === appPath)
+
+          if (isLocalShortcut) {
+            // 本地启动项：使用 shell.openPath 打开
+            const result = await shell.openPath(appPath)
+            if (result) {
+              console.error('打开本地启动项失败:', result)
+              throw new Error(`打开失败: ${result}`)
+            }
+          } else {
+            // 普通应用
+            await launchApp(appPath, confirmDialog)
+          }
         }
 
         // 添加到历史记录
