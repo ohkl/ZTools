@@ -60,6 +60,9 @@ export const useWindowStore = defineStore('window', () => {
   // 固定栏显示行数
   const pinnedRows = ref(2)
 
+  // 搜索框模式
+  const searchBoxMode = ref<'aggregate' | 'list'>('aggregate')
+
   const theme = ref('system') // system, light, dark
   const primaryColor = ref('blue') // blue, purple, green, orange, red, pink, custom
   const customColor = ref('#db2777') // 自定义颜色
@@ -166,6 +169,10 @@ export const useWindowStore = defineStore('window', () => {
 
   function updatePinnedRows(rows: number): void {
     pinnedRows.value = rows
+  }
+
+  function updateSearchBoxMode(mode: 'aggregate' | 'list'): void {
+    searchBoxMode.value = mode
   }
 
   function updateTheme(value: string): void {
@@ -468,6 +475,9 @@ export const useWindowStore = defineStore('window', () => {
         if (data.pinnedRows) {
           pinnedRows.value = data.pinnedRows
         }
+        if (data.searchBoxMode) {
+          searchBoxMode.value = data.searchBoxMode
+        }
       } else {
         // 默认蓝色
         updatePrimaryColor('blue')
@@ -514,8 +524,10 @@ export const useWindowStore = defineStore('window', () => {
     updateShowRecentInSearch,
     recentRows,
     pinnedRows,
+    searchBoxMode,
     updateRecentRows,
     updatePinnedRows,
+    updateSearchBoxMode,
     updateTheme,
     updatePrimaryColor,
     updateCustomColor,

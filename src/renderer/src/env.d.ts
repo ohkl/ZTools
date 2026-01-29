@@ -215,6 +215,7 @@ declare global {
       onUpdateShowRecentInSearch: (callback: (showRecentInSearch: boolean) => void) => void
       onUpdateRecentRows: (callback: (rows: number) => void) => void
       onUpdatePinnedRows: (callback: (rows: number) => void) => void
+      onUpdateSearchBoxMode: (callback: (mode: 'aggregate' | 'list') => void) => void
       onUpdatePrimaryColor: (
         callback: (data: { primaryColor: string; customColor?: string }) => void
       ) => void

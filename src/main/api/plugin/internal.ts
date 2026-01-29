@@ -389,6 +389,16 @@ export class InternalPluginAPI {
       return { success: true }
     })
 
+    // 通知主渲染进程更新搜索框模式
+    ipcMain.handle('internal:update-search-box-mode', async (event, mode: 'aggregate' | 'list') => {
+      if (!requireInternalPlugin(this.pluginManager, event)) {
+        throw new PermissionDeniedError('internal:update-search-box-mode')
+      }
+      // 广播到主渲染进程
+      this.mainWindow?.webContents.send('update-search-box-mode', mode)
+      return { success: true }
+    })
+
     // 通知主渲染进程更新主题色
     ipcMain.handle(
       'internal:update-primary-color',
