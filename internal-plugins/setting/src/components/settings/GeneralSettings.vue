@@ -269,6 +269,21 @@
       </div>
     </div>
 
+    <!-- 搜索框模式设置 -->
+    <div class="setting-item">
+      <div class="setting-label">
+        <span>搜索框模式</span>
+        <span class="setting-desc">选择搜索框的显示模式</span>
+      </div>
+      <div class="setting-control">
+        <Dropdown
+          v-model="searchBoxMode"
+          :options="searchBoxModeOptions"
+          @change="handleSearchBoxModeChange"
+        />
+      </div>
+    </div>
+
     <!-- 搜索框显示最近使用 -->
     <div class="setting-item">
       <div class="setting-label">
@@ -506,6 +521,11 @@ const pinnedRowsOptions = [
   { label: '4行', value: 4 }
 ]
 
+const searchBoxModeOptions = [
+  { label: '聚合模式', value: 'aggregate' },
+  { label: '列表模式', value: 'list' }
+]
+
 // 当前平台（与 window.ztools.getPlatform 返回类型保持一致）
 const platform = ref<'darwin' | 'win32' | 'linux'>('darwin')
 
@@ -525,6 +545,7 @@ const autoBackToSearch = ref<AutoBackToSearchOption>('never')
 const showRecentInSearch = ref(true)
 const recentRows = ref(2)
 const pinnedRows = ref(2)
+const searchBoxMode = ref<'aggregate' | 'list'>('aggregate')
 
 // 实际快捷键字符串
 const hotkey = ref('')
@@ -793,6 +814,18 @@ async function handlePinnedRowsChange(): Promise<void> {
     console.log('固定栏行数已更新:', pinnedRows.value)
   } catch (error) {
     console.error('保存固定栏行数配置失败:', error)
+  }
+}
+
+// 处理搜索框模式变化
+async function handleSearchBoxModeChange(): Promise<void> {
+  try {
+    await saveSettings()
+    // 通知主渲染进程更新
+    await window.ztools.internal.updateSearchBoxMode(searchBoxMode.value)
+    console.log('搜索框模式已更新:', searchBoxMode.value)
+  } catch (error) {
+    console.error('保存搜索框模式配置失败:', error)
   }
 }
 
@@ -1198,6 +1231,7 @@ async function loadSettings(): Promise<void> {
       showRecentInSearch.value = data.showRecentInSearch ?? true
       recentRows.value = data.recentRows ?? 2
       pinnedRows.value = data.pinnedRows ?? 2
+      searchBoxMode.value = data.searchBoxMode ?? 'aggregate'
       theme.value = data.theme ?? 'system'
       primaryColor.value = data.primaryColor ?? 'blue'
       // 窗口材质由主进程启动时保证一定有值，无需兜底
@@ -1260,6 +1294,7 @@ async function saveSettings(): Promise<void> {
       showRecentInSearch: showRecentInSearch.value,
       recentRows: recentRows.value,
       pinnedRows: pinnedRows.value,
+      searchBoxMode: searchBoxMode.value,
       theme: theme.value,
       primaryColor: primaryColor.value,
       customColor: customColor.value,

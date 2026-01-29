@@ -1,8 +1,8 @@
 <template>
   <div ref="scrollContainerRef" class="scrollable-content" @click="handleContainerClick">
-    <!-- 无搜索时显示历史 -->
+    <!-- 无搜索时显示历史（仅在聚合模式下） -->
     <div
-      v-if="!searchQuery.trim() && !pastedImage && !pastedText && !pastedFiles"
+      v-if="windowStore.searchBoxMode === 'aggregate' && !searchQuery.trim() && !pastedImage && !pastedText && !pastedFiles"
       class="content-section"
     >
       <!-- 最近使用 -->
